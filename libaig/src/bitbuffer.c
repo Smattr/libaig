@@ -88,7 +88,7 @@ int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
     if (byte_offset < bb->buffer_size) {
       byte = (uint8_t)bb->buffer[byte_offset];
     } else {
-      assert(byte_offset == bb->buffer_size + 1 &&
+      assert(byte_offset == bb->buffer_size &&
         "offset in bb_get() beyond the buffer and the residue byte");
       byte = bb->residue;
     }
