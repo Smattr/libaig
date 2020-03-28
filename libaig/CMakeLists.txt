@@ -1,5 +1,6 @@
 add_library(libaig
   src/free.c
+  src/getters.c
   src/new.c
   src/load.c
   src/parse.c)

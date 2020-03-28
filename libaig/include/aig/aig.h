@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdint.h>
 
 #ifdef __cpluscplus
 extern "C" {
@@ -8,6 +9,8 @@ extern "C" {
 
 /// an opaque handle to an AIG
 typedef struct aig aig_t;
+
+// AIG lifetime functions /////////////////////////////////////////////////////
 
 /** allocate and initialise a new, blank AIG
  *
@@ -37,6 +40,47 @@ int aig_loadf(aig_t **aig, FILE *f);
  * \param aig [in,out] Handle to data structure to deallocate and set to NULL
  */
 void aig_free(aig_t **aig);
+
+////////////////////////////////////////////////////////////////////////////////
+
+// header/summary access ///////////////////////////////////////////////////////
+
+/** get the maximum variable index (M) of this AIG
+ *
+ * \param aig Handle to AIG data structure to read from
+ * \returns maximum variable index
+ */
+uint64_t aig_max_index(const aig_t *aig);
+
+/** get the number of inputs (I) to this AIG
+ *
+ * \param aig Handle to AIG data structure to read from
+ * \returns number of inputs
+ */
+uint64_t aig_input_count(const aig_t *aig);
+
+/** get the number of latches (L) in this AIG
+ *
+ * \param aig Handle to AIG data structure to read from
+ * \returns number of latches
+ */
+uint64_t aig_latch_count(const aig_t *aig);
+
+/** get the number of outputs (O) from this AIG
+ *
+ * \param aig Handle to AIG data structure to read from
+ * \returns number of outputs
+ */
+uint64_t aig_output_count(const aig_t *aig);
+
+/** get the number of AND gates (A) in this AIG
+ *
+ * \param aig Handle to AIG data structure to read from
+ * \returns number of AND gates
+ */
+uint64_t aig_and_count(const aig_t *aig);
+
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cpluscplus
 }
