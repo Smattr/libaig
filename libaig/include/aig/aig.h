@@ -180,6 +180,38 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result);
  */
 int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result);
 
+/// an opaque handle to an iterator over an AIG’s nodes
+typedef struct aig_node_iter aig_node_iter_t;
+
+/** create a new iterator over this AIG’s nodes
+ *
+ * \param aig The AIG to iterate over
+ * \param it [out] A created iterator on success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_iter(aig_t *aig, aig_node_iter_t **it);
+
+/** is this AIG iterator not exhausted?
+ *
+ * \param it Iterator to examine
+ * \returns True if this iterator has more nodes to yield
+ */
+bool aig_iter_has_next(const aig_node_iter_t *it);
+
+/** retrieve the next node in this iterator’s AIG
+ *
+ * \param it Iterator to consume
+ * \param item [out] The next node in the iteration on success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_iter_next(aig_node_iter_t *it, struct aig_node *item);
+
+/** deallocate an AIG node iterator
+ *
+ * \param it The iterator to deallocate
+ */
+void aig_iter_free(aig_node_iter_t **it);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef __cpluscplus

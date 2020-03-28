@@ -5,6 +5,7 @@ add_library(libaig
   src/load.c
   src/new.c
   src/node.c
+  src/node_iter.c
   src/parse.c)
 
 target_include_directories(libaig
