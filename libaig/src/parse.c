@@ -314,3 +314,54 @@ int parse_latches(aig_t *aig, uint64_t upto) {
 
   return 0;
 }
+
+int parse_outputs(aig_t *aig, uint64_t upto) {
+
+  assert(aig != NULL);
+
+  // if we have not yet parsed inputs and latches, we need to first parse those
+  // sections
+  if (aig->state < IN_OUTPUTS) {
+    int rc = parse_latches(aig, UINT64_MAX);
+    if (rc)
+      return rc;
+    aig->state = IN_OUTPUTS;
+    aig->index = 0;
+  }
+
+  // have we already read past the given index?
+  if (aig->state > IN_OUTPUTS)
+    return 0;
+  if (aig->state == IN_OUTPUTS && aig->index > upto)
+    return 0;
+
+  for (uint64_t i = aig->index; i < aig->output_count && i <= upto; i++) {
+
+    // in non-strict mode, ignore leading white space
+    if (!aig->strict)
+      (void)skip_whitespace(aig->source);
+
+    // parse the current output
+    uint64_t o;
+    int rc = parse_num(aig->source, &o);
+    if (rc)
+      return rc;
+
+    // is the output a legal variable index?
+    if (o > bb_limit(aig))
+      return ERANGE;
+
+    // read the line terminator
+    rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
+    if (rc)
+      return rc;
+
+    // store the parsed value in the output array
+    if ((rc = bb_append(&aig->outputs, o, bb_limit(aig))))
+      return rc;
+
+    aig->index = i;
+  }
+
+  return 0;
+}
