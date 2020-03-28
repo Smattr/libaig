@@ -95,7 +95,7 @@ int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
     uint64_t bit = (byte >> bit_offset) & 1;
 
     // add it to the accumulated value
-    v = (v << 1) | bit;
+    v |= bit << i;
   }
 
   *value = v;
