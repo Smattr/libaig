@@ -297,7 +297,7 @@ int parse_latches(aig_t *aig, uint64_t upto) {
 
     // fail if this exceeds the maximum variable index, as we rely on this to
     // store the next states in aig->latches
-    if (next > aig->max_index * 2 + 1)
+    if (next > bb_limit(aig))
       return ERANGE;
 
     // read the line terminator
@@ -306,7 +306,7 @@ int parse_latches(aig_t *aig, uint64_t upto) {
       return rc;
 
     // store the parsed value in the latch array
-    if ((rc = bb_append(&aig->latches, next, aig->max_index * 2 + 1)))
+    if ((rc = bb_append(&aig->latches, next, bb_limit(aig))))
       return rc;
 
     aig->index = i;

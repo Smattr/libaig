@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include "bitbuffer.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -52,3 +53,16 @@ struct __attribute__((visibility("internal"))) aig {
   /// are we using eager loading mode?
   uint8_t eager:1;
 };
+
+/** get the limit value to use for bit buffers in an AIG struct
+ *
+ * \param aig Structure to examine
+ * \returns Limit value for use with bb_append(), bb_get()
+ */
+static inline uint64_t bb_limit(const aig_t *aig) {
+  assert(aig != NULL);
+
+  // the bit buffers store elements that are representations of possibly-negated
+  // variable indices as they appear in the AIGER file format
+  return aig->max_index * 2 + 1;
+}
