@@ -93,6 +93,95 @@ uint64_t aig_and_count(const aig_t *aig);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// node access /////////////////////////////////////////////////////////////////
+
+/// the type of an AIG node
+enum aig_node_type {
+  AIG_INPUT,
+  AIG_LATCH,
+  AIG_OUTPUT,
+  AIG_AND_GATE,
+};
+
+/// a node in an AIG
+struct aig_node {
+
+  /// type of this node
+  enum aig_node_type type;
+
+  /// index in its containing AIG
+  uint64_t index;
+
+  /// optional name from the AIG’s symbol table
+  const char *name;
+
+  union {
+
+    // fields that are relevant for latches
+    struct {
+
+      /// current state of this latch
+      uint64_t current;
+
+      /// next state of this latch
+      uint64_t next;
+
+    };
+
+    // fields that are relevant for AND gates
+    struct {
+
+      /// output index of this AND gate
+      uint64_t lhs;
+
+      /// input indices of this AND gate
+      uint64_t rhs[2];
+
+      /// whether each input is negated
+      bool negated[2];
+
+    };
+  };
+};
+
+/** lookup the input with the given index in this AIG
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought input
+ * \param result [out] The located input if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result);
+
+/** lookup the latch with the given index in this AIG
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought latch
+ * \param result [out] The located latch if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result);
+
+/** lookup the output with the given index in this AIG
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought output
+ * \param result [out] The located output if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result);
+
+/** lookup the AND gate with the given index in this AIG
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought AND gate
+ * \param result [out] The located AND gate if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result);
+
+////////////////////////////////////////////////////////////////////////////////
+
 #ifdef __cpluscplus
 }
 #endif

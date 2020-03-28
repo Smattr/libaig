@@ -1,8 +1,9 @@
 add_library(libaig
   src/free.c
   src/getters.c
-  src/new.c
   src/load.c
+  src/new.c
+  src/node.c
   src/parse.c)
 
 target_include_directories(libaig
