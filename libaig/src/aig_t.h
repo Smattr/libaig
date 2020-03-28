@@ -23,6 +23,19 @@ struct __attribute__((visibility("internal"))) aig {
   /// input file (or in-memory buffer) AIG was read from
   FILE *source;
 
+  /// internal parsing state
+  struct {
+    enum state {
+      IN_INPUTS,
+      IN_LATCHES,
+      IN_OUTPUTS,
+      IN_ANDS,
+      IN_SYMTAB,
+      DONE,
+    } state;
+    uint64_t index;
+  };
+
   /// was the source binary encoded instead of ASCII?
   uint8_t binary:1;
 

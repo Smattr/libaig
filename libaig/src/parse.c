@@ -201,3 +201,40 @@ int parse_header(aig_t *aig) {
 
   return rc;
 }
+
+int parse_inputs(aig_t *aig, uint64_t upto) {
+
+  // have we already read past the given index?
+  if (aig->state > IN_INPUTS || aig->index > upto)
+    return 0;
+
+  // for a binary AIG, inputs are omitted
+  if (aig->binary)
+    return 0;
+
+  for (uint64_t i = aig->index; i < aig->input_count + 1 && i <= upto; i++) {
+
+    // in non-strict mode, ignore leading white space
+    if (!aig->strict)
+      (void)skip_whitespace(aig->source);
+
+    // parse the input itself
+    uint64_t n;
+    int rc = parse_num(aig->source, &n);
+    if (rc)
+      return rc;
+
+    // we already know what it should be, so fail in strict mode if there is a
+    // mismatch
+    if (aig->strict && n != 2 * i)
+      return EILSEQ;
+
+    rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
+    if (rc)
+      return rc;
+
+    aig->index = i;
+  }
+
+  return 0;
+}

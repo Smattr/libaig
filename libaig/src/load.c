@@ -2,6 +2,7 @@
 #include "aig_t.h"
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include "parse.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,10 +17,18 @@ static int load(aig_t *aig) {
   if ((rc = parse_header(aig)))
     return rc;
 
-  if (aig->eager)
-    return ENOTSUP;
+  aig->state = IN_INPUTS;
+  aig->index = 1;
 
-  return rc;
+  // if we are parsing lazily, leave the remainder of the file to later
+  if (!aig->eager)
+    return rc;
+
+  // parse the entire input section
+  if ((rc = parse_inputs(aig, UINT64_MAX)))
+    return rc;
+
+  return ENOTSUP;
 }
 
 int aig_load(aig_t **aig, const char *filename, struct aig_options options) {
