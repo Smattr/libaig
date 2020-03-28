@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include "parse.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -204,6 +205,8 @@ int parse_header(aig_t *aig) {
 
 int parse_inputs(aig_t *aig, uint64_t upto) {
 
+  assert(aig != NULL);
+
   // have we already read past the given index?
   if (aig->state > IN_INPUTS || aig->index > upto)
     return 0;
@@ -232,6 +235,66 @@ int parse_inputs(aig_t *aig, uint64_t upto) {
     rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
     if (rc)
       return rc;
+
+    aig->index = i;
+  }
+
+  return 0;
+}
+
+int parse_latches(aig_t *aig, uint64_t upto) {
+
+  assert(aig != NULL);
+
+  // if we have not yet parsed the input section, we need to first do that
+  if (aig->state == IN_INPUTS) {
+    int rc = parse_inputs(aig, UINT64_MAX);
+    if (rc)
+      return rc;
+    aig->state = IN_LATCHES;
+    aig->index = aig->input_count + 1;
+  }
+
+  // have we already read past the given index?
+  if (aig->state > IN_LATCHES)
+    return 0;
+  if (aig->state == IN_LATCHES && aig->index > upto)
+    return 0;
+
+  for (uint64_t i = aig->index;
+       i < aig->input_count + aig->latch_count + 1 && i <= upto;
+       i++) {
+
+    // in non-strict mode, ignore leading white space
+    if (!aig->strict)
+      (void)skip_whitespace(aig->source);
+
+    // the current state of the latch is only present in the ASCII format
+    if (!aig->binary) {
+
+      // parse the current state of the latch
+      uint64_t n;
+      int rc = parse_num(aig->source, &n);
+      if (rc)
+        return rc;
+
+      // we already know what the current state should be, so fail in strict
+      // mode if there is a mismatch
+      if (aig->strict && n != 2 * i)
+        return EILSEQ;
+    }
+
+    int rc = aig->strict ? skip_space(aig->source)
+                         : skip_whitespace(aig->source);
+    if (rc)
+      return rc;
+
+    // read the next state of the latch
+    uint64_t next;
+    if ((rc = parse_num(aig->source, &next)))
+      return rc;
+
+    // TODO: store the next state in the AIG struct
 
     aig->index = i;
   }
