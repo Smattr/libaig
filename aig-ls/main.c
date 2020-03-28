@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char **argv) {
 
@@ -15,7 +16,7 @@ int main(int argc, char **argv) {
   aig_t *aig = NULL;
   int rc = aig_load(&aig, argv[1], (struct aig_options){ 0 });
   if (rc != 0) {
-    perror("aig_load");
+    fprintf(stderr, "aig_load: %s\n", strerror(rc));
     return EXIT_FAILURE;
   }
 
