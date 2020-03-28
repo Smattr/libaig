@@ -13,8 +13,10 @@ int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result) {
   if (result == NULL)
     return EINVAL;
 
-  // does the AIG have at least this many inputs?
-  if (index >= aig->input_count)
+  // is this a valid input in this AIG?
+  if (index == 0)
+    return ERANGE;
+  if (index > aig->input_count)
     return ERANGE;
 
   memset(result, 0, sizeof(*result));
@@ -34,8 +36,10 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
   if (result == NULL)
     return EINVAL;
 
-  // does the AIG have at least this many outputs?
-  if (index >= aig->output_count)
+  // is this a valid output in this AIG?
+  if (index <= aig->input_count + aig->latch_count)
+    return ERANGE;
+  if (index > aig->input_count + aig->latch_count + aig->output_count)
     return ERANGE;
 
   memset(result, 0, sizeof(*result));
