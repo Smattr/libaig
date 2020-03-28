@@ -16,7 +16,7 @@ static int read_char(FILE *f, char *out) {
   int c = getc(f);
   if (c == EOF) {
     int err = ferror(f);
-    return err == 0 ? ENOENT : err;
+    return err == 0 ? EILSEQ : err;
   }
 
   *out = c;
@@ -34,7 +34,7 @@ static int skip(FILE *f, char e) {
 
   if (c != e) {
     ungetc(c, f);
-    return ENOENT;
+    return EILSEQ;
   }
 
   return 0;
@@ -82,7 +82,7 @@ static int parse_num(FILE *f, uint64_t *out) {
 
   if (!isdigit(c)) {
     ungetc(c, f);
-    return ENOENT;
+    return EILSEQ;
   }
 
   uint64_t v = c - '0';
@@ -91,7 +91,7 @@ static int parse_num(FILE *f, uint64_t *out) {
 
     char d;
     if ((rc = read_char(f, &d))) {
-      if (rc == ENOENT) {
+      if (rc == EILSEQ) {
         rc = 0;
         break;
       }
@@ -136,7 +136,7 @@ int parse_header(aig_t *aig) {
 
   if (c != 'a') {
     ungetc(c, aig->source);
-    return ENOENT;
+    return EILSEQ;
   }
 
   if ((rc = read_char(aig->source, &c)))
@@ -148,7 +148,7 @@ int parse_header(aig_t *aig) {
     aig->binary = 1;
   } else {
     ungetc(c, aig->source);
-    return ENOENT;
+    return EILSEQ;
   }
 
   if ((rc = read_char(aig->source, &c)))
@@ -156,7 +156,7 @@ int parse_header(aig_t *aig) {
 
   if (c != 'g') {
     ungetc(c, aig->source);
-    return ENOENT;
+    return EILSEQ;
   }
 
   // in non-strict mode, skip arbitrary amounts of white space instead of just a
