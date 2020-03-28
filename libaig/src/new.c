@@ -12,8 +12,8 @@ int aig_new(aig_t **aig, struct aig_options options) {
   if (a == NULL)
     return ENOMEM;
 
-  // options.strict is irrelevant when we are not parsing the AIG but rather
-  // creating it from scratch, so ignore it
+  // options.strict and options.eager are irrelevant when we are not parsing the
+  // AIG but rather creating it from scratch, so ignore them
   (void)options;
 
   *aig = a;

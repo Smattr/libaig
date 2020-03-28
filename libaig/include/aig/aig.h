@@ -16,6 +16,9 @@ struct aig_options {
 
   /// demand exact white space conformance when parsing
   bool strict;
+
+  /// parse entire AIG file on load
+  bool eager;
 };
 
 // AIG lifetime functions /////////////////////////////////////////////////////

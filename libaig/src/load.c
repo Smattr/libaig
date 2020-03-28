@@ -16,6 +16,9 @@ static int load(aig_t *aig) {
   if ((rc = parse_header(aig)))
     return rc;
 
+  if (aig->eager)
+    return ENOTSUP;
+
   return rc;
 }
 
@@ -40,6 +43,7 @@ int aig_load(aig_t **aig, const char *filename, struct aig_options options) {
   }
 
   a->strict = options.strict;
+  a->eager = options.eager;
 
   if ((rc = load(a)))
     goto done;
@@ -77,6 +81,7 @@ int aig_loadf(aig_t **aig, FILE *f, struct aig_options options) {
 
   a->source = f;
   a->strict = options.strict;
+  a->eager = options.eager;
 
   if ((rc = load(a)))
     goto done;

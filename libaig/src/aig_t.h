@@ -28,4 +28,7 @@ struct __attribute__((visibility("internal"))) aig {
 
   /// are we using strict parsing mode?
   uint8_t strict:1;
+
+  /// are we using eager loading mode?
+  uint8_t eager:1;
 };
