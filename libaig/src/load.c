@@ -19,7 +19,7 @@ static int load(aig_t *aig) {
   return rc;
 }
 
-int aig_load(aig_t **aig, const char *filename) {
+int aig_load(aig_t **aig, const char *filename, struct aig_options options) {
 
   if (aig == NULL)
     return EINVAL;
@@ -30,7 +30,7 @@ int aig_load(aig_t **aig, const char *filename) {
   int rc = 0;
 
   aig_t *a = NULL;
-  if ((rc = aig_new(&a)))
+  if ((rc = aig_new(&a, options)))
     goto done;
 
   a->source = fopen(filename, "r");
@@ -38,6 +38,8 @@ int aig_load(aig_t **aig, const char *filename) {
     rc = errno;
     goto done;
   }
+
+  a->strict = options.strict;
 
   if ((rc = load(a)))
     goto done;
@@ -59,7 +61,7 @@ done:
   return rc;
 }
 
-int aig_loadf(aig_t **aig, FILE *f) {
+int aig_loadf(aig_t **aig, FILE *f, struct aig_options options) {
 
   if (aig == NULL)
     return EINVAL;
@@ -70,10 +72,11 @@ int aig_loadf(aig_t **aig, FILE *f) {
   int rc = 0;
 
   aig_t *a = NULL;
-  if ((rc = aig_new(&a)))
+  if ((rc = aig_new(&a, options)))
     goto done;
 
   a->source = f;
+  a->strict = options.strict;
 
   if ((rc = load(a)))
     goto done;

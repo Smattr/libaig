@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   }
 
   aig_t *aig = NULL;
-  int rc = aig_load(&aig, argv[1]);
+  int rc = aig_load(&aig, argv[1], (struct aig_options){ 0 });
   if (rc != 0) {
     perror("aig_load");
     return EXIT_FAILURE;

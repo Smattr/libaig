@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -21,9 +20,12 @@ struct __attribute__((visibility("internal"))) aig {
   /// number of AND gates
   uint64_t and_count;
 
-  /// was the source binary encoded instead of ASCII?
-  bool binary;
-
   /// input file (or in-memory buffer) AIG was read from
   FILE *source;
+
+  /// was the source binary encoded instead of ASCII?
+  uint8_t binary:1;
+
+  /// are we using strict parsing mode?
+  uint8_t strict:1;
 };

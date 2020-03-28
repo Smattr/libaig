@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -10,6 +11,13 @@ extern "C" {
 /// an opaque handle to an AIG
 typedef struct aig aig_t;
 
+/// options that can be specified when creating an AIG handle
+struct aig_options {
+
+  /// demand exact white space conformance when parsing
+  bool strict;
+};
+
 // AIG lifetime functions /////////////////////////////////////////////////////
 
 /** allocate and initialise a new, blank AIG
@@ -17,7 +25,7 @@ typedef struct aig aig_t;
  * \param aig [out] Handle to the initialised data structure
  * \returns 0 on success or an errno on failure
  */
-int aig_new(aig_t **aig);
+int aig_new(aig_t **aig, struct aig_options options);
 
 /** allocate a new AIG and initialise it from the given file
  *
@@ -25,7 +33,7 @@ int aig_new(aig_t **aig);
  * \param filename Source file to read
  * \returns 0 on success or an errno on failure
  */
-int aig_load(aig_t **aig, const char *filename);
+int aig_load(aig_t **aig, const char *filename, struct aig_options options);
 
 /** allocate a new AIG and initialise it from the given file pointer
  *
@@ -33,7 +41,7 @@ int aig_load(aig_t **aig, const char *filename);
  * \param f Source file handle to read from
  * \returns 0 on success or an errno on failure
  */
-int aig_loadf(aig_t **aig, FILE *f);
+int aig_loadf(aig_t **aig, FILE *f, struct aig_options options);
 
 /** deallocate resources associated with an AIG
  *

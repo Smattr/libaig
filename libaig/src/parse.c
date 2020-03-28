@@ -48,6 +48,27 @@ static int skip_newline(FILE *f) {
   return skip(f, '\n');
 }
 
+static int skip_whitespace(FILE *f) {
+  bool read_one = false;
+  for (; ; read_one = true) {
+
+    char c;
+    int rc = read_char(f, &c);
+    if (rc) {
+      if (!read_one)
+        return rc;
+      break;
+    }
+
+    if (!isspace(c)) {
+      ungetc(c, f);
+      break;
+    }
+  }
+
+  return 0;
+}
+
 static int parse_num(FILE *f, uint64_t *out) {
 
   assert(f != NULL);
@@ -102,6 +123,10 @@ int parse_header(aig_t *aig) {
 
   int rc = 0;
 
+  // in non-strict mode, ignore any leading white space
+  if (!aig->strict)
+    (void)skip_whitespace(aig->source);
+
   // the header should start with either "aag" for the ASCII format or "aig" for
   // the binary format
 
@@ -118,9 +143,9 @@ int parse_header(aig_t *aig) {
     return rc;
 
   if (c == 'a') {
-    aig->binary = false;
+    aig->binary = 0;
   } else if (c == 'i') {
-    aig->binary = true;
+    aig->binary = 1;
   } else {
     ungetc(c, aig->source);
     return ENOENT;
@@ -134,7 +159,11 @@ int parse_header(aig_t *aig) {
     return ENOENT;
   }
 
-  if ((rc = skip_space(aig->source)))
+  // in non-strict mode, skip arbitrary amounts of white space instead of just a
+  // single space
+  int (*skipper)(FILE*) = aig->strict ? skip_space : skip_whitespace;
+
+  if ((rc = skipper(aig->source)))
     return rc;
 
   // now the M, I, L, O, A fields follow
@@ -142,31 +171,32 @@ int parse_header(aig_t *aig) {
   if ((rc = parse_num(aig->source, &aig->max_index)))
     return rc;
 
-  if ((rc = skip_space(aig->source)))
+  if ((rc = skipper(aig->source)))
     return rc;
 
   if ((rc = parse_num(aig->source, &aig->input_count)))
     return rc;
 
-  if ((rc = skip_space(aig->source)))
+  if ((rc = skipper(aig->source)))
     return rc;
 
   if ((rc = parse_num(aig->source, &aig->latch_count)))
     return rc;
 
-  if ((rc = skip_space(aig->source)))
+  if ((rc = skipper(aig->source)))
     return rc;
 
   if ((rc = parse_num(aig->source, &aig->output_count)))
     return rc;
 
-  if ((rc = skip_space(aig->source)))
+  if ((rc = skipper(aig->source)))
     return rc;
 
   if ((rc = parse_num(aig->source, &aig->and_count)))
     return rc;
 
-  if ((rc = skip_newline(aig->source)))
+  if ((rc = aig->strict ? skip_newline(aig->source)
+                        : skip_whitespace(aig->source)))
     return rc;
 
   return rc;
