@@ -2,6 +2,7 @@
 #include "aig_t.h"
 #include <assert.h>
 #include <errno.h>
+#include "parse.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,9 +11,12 @@ static int load(aig_t *aig) {
   assert(aig != NULL);
   assert(aig->source != NULL);
 
-  // TODO
+  int rc = 0;
 
-  return 0;
+  if ((rc = parse_header(aig)))
+    return rc;
+
+  return rc;
 }
 
 int aig_load(aig_t **aig, const char *filename) {
