@@ -73,7 +73,7 @@ int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
   size_t w = entry_width(limit);
 
   // does this entry lie beyond the extent of the buffer?
-  if (index * w > bb->buffer_size * w + bb->residue_bits)
+  if (index * w + w > bb->buffer_size * w + bb->residue_bits)
     return ERANGE;
 
   // read out the entry
