@@ -28,6 +28,10 @@ static int load(aig_t *aig) {
   if ((rc = parse_inputs(aig, UINT64_MAX)))
     return rc;
 
+  // parse the entire latch section
+  if ((rc = parse_latches(aig, UINT64_MAX)))
+    return rc;
+
   return ENOTSUP;
 }
 
