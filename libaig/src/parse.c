@@ -296,7 +296,7 @@ int parse_latches(aig_t *aig, uint64_t upto) {
       return rc;
 
     // store the parsed value in the latch array
-    if ((rc = bb_append(&aig->latches, next, aig->max_index)))
+    if ((rc = bb_append(&aig->latches, next, aig->max_index * 2 + 1)))
       return rc;
 
     aig->index = i;

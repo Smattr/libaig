@@ -52,7 +52,7 @@ int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result) {
   // retrieve the latch’s next state
   uint64_t next;
   uint64_t buffer_index = index - aig->input_count - 1;
-  if ((rc = bb_get(&aig->latches, buffer_index, aig->max_index, &next)))
+  if ((rc = bb_get(&aig->latches, buffer_index, aig->max_index * 2 + 1, &next)))
     return rc;
 
   memset(result, 0, sizeof(*result));
