@@ -27,6 +27,9 @@ struct __attribute__((visibility("internal"))) aig {
   /// next state values for each latch
   bitbuffer_t latches;
 
+  /// output nodes
+  bitbuffer_t outputs;
+
   /// internal parsing state
   struct {
     enum state {

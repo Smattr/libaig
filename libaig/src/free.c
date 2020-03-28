@@ -13,6 +13,7 @@ void aig_free(aig_t **aig) {
   aig_t *a = *aig;
 
   bb_reset(&a->latches);
+  bb_reset(&a->outputs);
 
   if (a->source != NULL) {
     (void)fclose(a->source);
