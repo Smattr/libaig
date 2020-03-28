@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bitbuffer.h"
 #include <stdio.h>
 #include <stdint.h>
 
@@ -22,6 +23,9 @@ struct __attribute__((visibility("internal"))) aig {
 
   /// input file (or in-memory buffer) AIG was read from
   FILE *source;
+
+  /// next state values for each latch
+  bitbuffer_t latches;
 
   /// internal parsing state
   struct {

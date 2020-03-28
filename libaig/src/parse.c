@@ -1,5 +1,6 @@
 #include <aig/aig.h>
 #include "aig_t.h"
+#include "bitbuffer.h"
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -294,7 +295,9 @@ int parse_latches(aig_t *aig, uint64_t upto) {
     if ((rc = parse_num(aig->source, &next)))
       return rc;
 
-    // TODO: store the next state in the AIG struct
+    // store the parsed value in the latch array
+    if ((rc = bb_append(&aig->latches, next, aig->max_index)))
+      return rc;
 
     aig->index = i;
   }
