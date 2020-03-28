@@ -300,6 +300,11 @@ int parse_latches(aig_t *aig, uint64_t upto) {
     if (next > aig->max_index * 2 + 1)
       return ERANGE;
 
+    // read the line terminator
+    rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
+    if (rc)
+      return rc;
+
     // store the parsed value in the latch array
     if ((rc = bb_append(&aig->latches, next, aig->max_index * 2 + 1)))
       return rc;
