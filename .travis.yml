@@ -1,0 +1,15 @@
+language: c
+
+matrix:
+  include:
+
+  - name: Ubuntu Linux 18.04
+    os: linux
+    dist: bionic
+
+  - name: macOS, XCode 11.3
+    os: osx
+    osx_image: xcode11.3
+
+script:
+  - mkdir build && cd build && cmake .. && cmake --build . && sudo env "PATH=$PATH" cmake --build . -- install
