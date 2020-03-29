@@ -76,3 +76,13 @@ int parse_ands(aig_t *aig, uint64_t upto);
  */
 __attribute__((visibility("internal")))
 int parse_symtab(aig_t *aig, uint64_t upto);
+
+/** parse all sections of an AIG file beyond the header
+ *
+ * This does not parse the comments section.
+ *
+ * \param aig Data structure to read from
+ * \returns 0 on success or an errno on failure
+ */
+__attribute__((visibility("internal")))
+int parse_all(aig_t *aig);

@@ -597,3 +597,10 @@ int parse_symtab(aig_t *aig, uint64_t upto) {
 
   return 0;
 }
+
+int parse_all(aig_t *aig) {
+  // because the symbol table is the last section we are interested in and its
+  // parsing function calls all the preceding ones, simply ask to parse the
+  // entire symbol table
+  return parse_symtab(aig, UINT64_MAX);
+}
