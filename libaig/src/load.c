@@ -43,7 +43,11 @@ static int load(aig_t *aig) {
   if ((rc = parse_outputs(aig, UINT64_MAX)))
     return rc;
 
-  return ENOTSUP;
+  // parse the entire AND gate section
+  if ((rc = parse_ands(aig, UINT64_MAX)))
+    return rc;
+
+  return rc;
 }
 
 int aig_load(aig_t **aig, const char *filename, struct aig_options options) {
