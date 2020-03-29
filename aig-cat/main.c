@@ -48,17 +48,26 @@ int main(int argc, char **argv) {
         __builtin_unreachable();
 
       case AIG_INPUT:
-        printf("%" PRIu64 "\n", n.input.variable_index * 2);
+        printf("%" PRIu64, n.input.variable_index * 2);
+        if (n.input.name != NULL)
+          printf(" (symbol = %s)", n.input.name);
+        printf("\n");
         break;
 
       case AIG_LATCH:
-        printf("%" PRIu64 " %" PRIu64 "\n", n.latch.current * 2,
+        printf("%" PRIu64 " %" PRIu64, n.latch.current * 2,
           n.latch.next * 2 + (n.latch.next_negated ? 1 : 0));
+        if (n.latch.name != NULL)
+          printf(" (symbol = %s)", n.latch.name);
+        printf("\n");
         break;
 
       case AIG_OUTPUT:
-        printf("%" PRIu64 "\n",
+        printf("%" PRIu64,
           n.output.variable_index * 2 + (n.output.negated ? 1 : 0));
+        if (n.output.name != NULL)
+          printf(" (symbol = %s)", n.output.name);
+        printf("\n");
         break;
 
       case AIG_AND_GATE:
