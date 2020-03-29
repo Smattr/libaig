@@ -30,6 +30,10 @@ int bb_append(bitbuffer_t *bb, uint64_t value, uint64_t limit) {
 
   size_t w = entry_width(limit);
 
+  // the entry width we have calculated better not be more narrow than the value
+  // we are trying to store
+  assert(value < UINT64_C(1) << w);
+
   // write the entry bit-by-bit
   // TODO: accelerate this by writing byte-by-byte
   for (size_t i = 0; i < w; i++) {
