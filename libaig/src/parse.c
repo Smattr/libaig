@@ -262,6 +262,8 @@ int parse_latches(aig_t *aig, uint64_t upto) {
   if (aig->state == IN_LATCHES && aig->index > upto)
     return 0;
 
+  int rc = 0;
+
   for (uint64_t i = aig->index; i < aig->latch_count && i <= upto; i++) {
 
     // in non-strict mode, ignore leading white space
@@ -273,20 +275,19 @@ int parse_latches(aig_t *aig, uint64_t upto) {
 
       // parse the current state of the latch
       uint64_t n;
-      int rc = parse_num(aig->source, &n);
-      if (rc)
+      if ((rc = parse_num(aig->source, &n)))
         return rc;
 
       // we already know what the current state should be, so fail in strict
       // mode if there is a mismatch
       if (aig->strict && n != 2 * (i + 1 + aig->input_count))
         return EILSEQ;
-    }
 
-    int rc = aig->strict ? skip_space(aig->source)
-                         : skip_whitespace(aig->source);
-    if (rc)
-      return rc;
+      rc = aig->strict ? skip_space(aig->source)
+                       : skip_whitespace(aig->source);
+      if (rc)
+        return rc;
+    }
 
     // read the next state of the latch
     uint64_t next;
