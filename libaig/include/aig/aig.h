@@ -21,27 +21,30 @@ struct aig_options {
   bool eager;
 };
 
-// AIG lifetime functions /////////////////////////////////////////////////////
+// AIG create/delete functions /////////////////////////////////////////////////
 
 /** allocate and initialise a new, blank AIG
  *
  * \param aig [out] Handle to the initialised data structure
+ * \param options Configuration for setting up this AIG
  * \returns 0 on success or an errno on failure
  */
 int aig_new(aig_t **aig, struct aig_options options);
 
 /** allocate a new AIG and initialise it from the given file
  *
- * \param [out] Handle to the initialised data structure
+ * \param aig [out] Handle to the initialised data structure
  * \param filename Source file to read
+ * \param options Configuration for parsing
  * \returns 0 on success or an errno on failure
  */
 int aig_load(aig_t **aig, const char *filename, struct aig_options options);
 
 /** allocate a new AIG and initialise it from the given file pointer
  *
- * \param [out] Handle to the initialised data structure
+ * \param aig [out] Handle to the initialised data structure
  * \param f Source file handle to read from
+ * \param options Configuration for parsing
  * \returns 0 on success or an errno on failure
  */
 int aig_loadf(aig_t **aig, FILE *f, struct aig_options options);
