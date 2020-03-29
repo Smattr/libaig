@@ -34,6 +34,9 @@ struct __attribute__((visibility("internal"))) aig {
   /// RHS of AND gates
   bitbuffer_t ands;
 
+  /// optional symbol table
+  char **symtab;
+
   /// internal parsing state
   struct {
     enum state {
