@@ -7,9 +7,9 @@
 #include <limits.h>
 #include "parse.h"
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 static int read_char(FILE *f, char *out) {
 
@@ -456,6 +456,143 @@ int parse_ands(aig_t *aig, uint64_t upto) {
     int rc = parse_and(aig, aig->index);
     if (rc)
       return rc;
+  }
+
+  return 0;
+}
+
+int parse_symtab(aig_t *aig, uint64_t upto) {
+
+  // if we have not yet parsed the preceding sections, parse those now
+  if (aig->state < IN_SYMTAB) {
+    int rc = parse_ands(aig, UINT64_MAX);
+    if (rc)
+      return rc;
+    aig->state = IN_SYMTAB;
+    aig->index = 0; // index is irrelevant when parsing the symbol table
+  }
+
+  // have we already finished parsing the symbol table?
+  if (aig->state > IN_SYMTAB)
+    return 0;
+
+  size_t symtab_size = aig->input_count + aig->latch_count + aig->output_count;
+
+  // if we are seeking something in range of the symbol table, see if we already
+  // have it
+  if (upto < symtab_size) {
+    if (aig->symtab != NULL && aig->symtab[upto] != NULL)
+      return 0;
+  }
+
+  // start parsing the symbol table
+  for (;;) {
+
+    // in non-strict mode, ignore leading white space
+    if (!aig->strict)
+      (void)skip_whitespace(aig->source);
+
+    char c;
+    int rc = read_char(aig->source, &c);
+    if (rc == EILSEQ) { // EOF
+      aig->state = DONE;
+      return 0;
+    } else if (rc) {
+      return rc;
+    }
+
+    // have we reached the comment section?
+    if (c == 'c') {
+      aig->state = DONE;
+      return 0;
+    }
+
+    // is this a illegal category for a symbol?
+    if (c != 'i' && c != 'l' && c != 'o') {
+      ungetc(c, aig->source);
+      return EILSEQ;
+    }
+
+    // parse the position of the symbol
+    uint64_t pos;
+    if ((rc = parse_num(aig->source, &pos)))
+      return rc;
+
+    // is the position a illegal index?
+    if (c == 'i' && pos >= aig->input_count)
+      return ERANGE;
+    if (c == 'l' && pos >= aig->latch_count)
+      return ERANGE;
+    if (c == 'o' && pos >= aig->output_count)
+      return ERANGE;
+
+    // skip the space in between the position and the symbol name
+    rc = aig->strict ? skip_space(aig->source) : skip_whitespace(aig->source);
+    if (rc)
+      return rc;
+
+    // we will need to write to the symbol table, so create it now if it has not
+    // been allocated
+    if (aig->symtab == NULL) {
+      aig->symtab = calloc(symtab_size, sizeof(aig->symtab[0]));
+      if (aig->symtab == NULL)
+        return ENOMEM;
+    }
+
+    // set up a buffer for reading the symbol name
+    char *buffer = NULL;
+    size_t buffer_size = 0;
+    FILE *b = open_memstream(&buffer, &buffer_size);
+    if (b == NULL)
+      return errno;
+
+    // now read the symbol name into the buffer
+    char s;
+    while (!(rc = read_char(aig->source, &s))) {
+      if (s == '\n')
+        break;
+      if (putc(s, b) == EOF) {
+        fclose(b);
+        free(buffer);
+        return ENOMEM;
+      }
+    }
+
+    // synchronise the buffer
+    fclose(b);
+
+    if (rc) {
+      free(buffer);
+      return rc;
+    }
+
+    // determine where this should lie in the symbol table
+    uint64_t index = pos;
+    if (c == 'l' || c == 'o')
+      index += aig->input_count;
+    if (c == 'o')
+      index += aig->latch_count;
+
+    assert(index < symtab_size &&
+      "out of bounds access when constructing symbol table");
+
+    // if there was a previous name for this, allow it to be overwritten if we
+    // are non-strict
+    if (aig->symtab[index] != NULL) {
+      if (aig->strict) {
+        free(buffer);
+        return EEXIST;
+      }
+      free(aig->symtab[index]);
+      aig->symtab[index] = NULL;
+    }
+
+    // write this entry into the symbol table
+    aig->symtab[index] = buffer;
+
+    // if this was the entry we were seeking, we are done
+    if (index == upto)
+      return 0;
   }
 
   return 0;

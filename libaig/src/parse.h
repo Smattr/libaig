@@ -63,3 +63,16 @@ int parse_outputs(aig_t *aig, uint64_t upto);
  */
 __attribute__((visibility("internal")))
 int parse_ands(aig_t *aig, uint64_t upto);
+
+/** parse the symbol table section of an AIG file
+ *
+ * In constrast to the other parsing function, the upto index here is within an
+ * array of the inputs, latches, and outputs. It does not have to be valid. So
+ * you can pass UINT64_MAX to parse the entire symbol table section.
+ *
+ * \param aig Data structure to read from
+ * \param upto Symbol index after which to stop parsing
+ * \returns 0 on success or an errno on failure
+ */
+__attribute__((visibility("internal")))
+int parse_symtab(aig_t *aig, uint64_t upto);
