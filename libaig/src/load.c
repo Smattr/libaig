@@ -6,6 +6,7 @@
 #include "parse.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static int load(aig_t *aig) {
 
@@ -121,6 +122,26 @@ done:
     free(a);
     a = NULL;
   }
+
+  return rc;
+}
+
+int aig_parse(aig_t **aig, const char *content, struct aig_options options) {
+
+  if (aig == NULL)
+    return EINVAL;
+
+  if (content == NULL)
+    return EINVAL;
+
+  FILE *f = fmemopen((void*)content, strlen(content), "r");
+  if (f == NULL)
+    return errno;
+
+  int rc = aig_loadf(aig, f, options);
+
+  if (rc)
+    fclose(f);
 
   return rc;
 }

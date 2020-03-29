@@ -49,6 +49,15 @@ int aig_load(aig_t **aig, const char *filename, struct aig_options options);
  */
 int aig_loadf(aig_t **aig, FILE *f, struct aig_options options);
 
+/** allocate a new AIG and initialise it from the given string
+ *
+ * \param aig [out] Handle to the initialised data structure
+ * \param content AIG data to read and parse
+ * \param options Configuration for parsing
+ * \returns 0 on success or an errno on failure
+ */
+int aig_parse(aig_t **aig, const char *content, struct aig_options options);
+
 /** deallocate resources associated with an AIG
  *
  * \param aig [in,out] Handle to data structure to deallocate and set to NULL
