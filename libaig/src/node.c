@@ -92,3 +92,37 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   return 0;
 }
+
+int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
+
+  if (aig == NULL)
+    return EINVAL;
+
+  if (result == NULL)
+    return EINVAL;
+
+  // is this a valid AND gate in this AIG?
+  if (index >= aig->and_count)
+    return ERANGE;
+
+  // ensure we have this AND gate’s data available
+  int rc = parse_ands(aig, index);
+  if (rc)
+    return rc;
+
+  // retrieve the AND gate’s RHS
+  uint64_t rhs0, rhs1;
+  if ((rc = bb_get(&aig->outputs, index * 2, bb_limit(aig), &rhs0)))
+    return rc;
+  if ((rc = bb_get(&aig->outputs, index * 2 + 1, bb_limit(aig), &rhs1)))
+    return rc;
+
+  memset(result, 0, sizeof(*result));
+  result->type = AIG_AND_GATE;
+  result->rhs[0] = rhs0 / 2;
+  result->rhs[1] = rhs1 / 2;
+  result->rhs_negated[0] = rhs0 % 2;
+  result->rhs_negated[1] = rhs1 % 2;
+
+  return 0;
+}

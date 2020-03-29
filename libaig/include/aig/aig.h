@@ -142,9 +142,6 @@ struct aig_node {
     // fields that are relevant for AND gates
     struct {
 
-      /// output index of this AND gate
-      uint64_t lhs;
-
       /// input indices of this AND gate
       uint64_t rhs[2];
 
