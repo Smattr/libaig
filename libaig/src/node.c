@@ -74,7 +74,7 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
     return ERANGE;
 
   // ensure we have this output’s data available
-  int rc = parse_latches(aig, index);
+  int rc = parse_outputs(aig, index);
   if (rc)
     return rc;
 
