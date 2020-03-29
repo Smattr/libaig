@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -50,6 +51,13 @@ int bb_append(bitbuffer_t *bb, uint64_t value, uint64_t limit);
  */
 int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
   uint64_t *value);
+
+/** check if a bit buffer contains nothing
+ *
+ * \param bb The buffer to check
+ * \returns true if empty
+ */
+bool bb_is_empty(const bitbuffer_t *bb);
 
 /** remove all items and clear the state of a buffer
  *

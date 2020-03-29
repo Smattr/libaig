@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "bitbuffer.h"
 #include <errno.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -104,6 +105,24 @@ int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
 
   *value = v;
   return 0;
+}
+
+bool bb_is_empty(const bitbuffer_t *bb) {
+
+  // if the buffer is uninitialised, we know it is empty
+  if (bb == NULL || bb->handle == NULL)
+    return true;
+
+  // synchronise the buffer so we can access bb->buffer_size
+  fflush(bb->handle);
+
+  if (bb->buffer_size > 0)
+    return false;
+
+  if (bb->residue_bits > 0)
+    return false;
+
+  return true;
 }
 
 void bb_reset(bitbuffer_t *bb) {
