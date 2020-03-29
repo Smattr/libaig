@@ -415,9 +415,9 @@ static int parse_and_ascii(aig_t *aig, uint64_t index) {
     return rc;
 
   // store these values in the AND gates array
-  if ((rc = bb_append(&aig->ands, rhs0, bb_limit(aig))))
+  if ((rc = bb_append(&aig->and_rhs, rhs0, bb_limit(aig))))
     return rc;
-  if ((rc = bb_append(&aig->ands, rhs1, bb_limit(aig))))
+  if ((rc = bb_append(&aig->and_rhs, rhs1, bb_limit(aig))))
     return rc;
 
   return 0;

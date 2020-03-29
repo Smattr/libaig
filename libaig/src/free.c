@@ -15,7 +15,8 @@ void aig_free(aig_t **aig) {
 
   bb_reset(&a->latches);
   bb_reset(&a->outputs);
-  bb_reset(&a->ands);
+  bb_reset(&a->and_lhs);
+  bb_reset(&a->and_rhs);
 
   if (a->symtab != NULL) {
     size_t sz = (size_t)(a->input_count + a->latch_count + a->output_count);

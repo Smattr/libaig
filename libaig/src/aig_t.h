@@ -31,8 +31,11 @@ struct __attribute__((visibility("internal"))) aig {
   /// output nodes
   bitbuffer_t outputs;
 
-  /// RHS of AND gates
-  bitbuffer_t ands;
+  /// LHS of AND gates
+  bitbuffer_t and_lhs;
+
+  /// RHSs of AND gates
+  bitbuffer_t and_rhs;
 
   /// optional symbol table
   char **symtab;

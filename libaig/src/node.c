@@ -187,9 +187,9 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   // retrieve the AND gate’s RHS
   uint64_t rhs0, rhs1;
-  if ((rc = bb_get(&aig->ands, index * 2, bb_limit(aig), &rhs0)))
+  if ((rc = bb_get(&aig->and_rhs, index * 2, bb_limit(aig), &rhs0)))
     return rc;
-  if ((rc = bb_get(&aig->ands, index * 2 + 1, bb_limit(aig), &rhs1)))
+  if ((rc = bb_get(&aig->and_rhs, index * 2 + 1, bb_limit(aig), &rhs1)))
     return rc;
 
   memset(result, 0, sizeof(*result));
