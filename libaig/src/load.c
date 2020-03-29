@@ -20,6 +20,13 @@ static int load(aig_t *aig) {
   aig->state = IN_INPUTS;
   aig->index = 0;
 
+  // the binary format requires the maximum variable index to be precise, so
+  // fail in strict mode if it is not
+  if (aig->strict && aig->binary) {
+    if (aig->max_index != aig->input_count + aig->latch_count + aig->and_count)
+      return ERANGE;
+  }
+
   // if we are parsing lazily, leave the remainder of the file to later
   if (!aig->eager)
     return rc;
