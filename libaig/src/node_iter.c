@@ -88,7 +88,9 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
   // if we have reached here, we must be up to an AND gate
   assert(index < it->aig->and_count && "incorrect aig_iter_next() logic");
 
-  return ENOTSUP;
+  int rc = aig_get_and(it->aig, index, item);
+  it->index++;
+  return rc;
 }
 
 void aig_iter_free(aig_node_iter_t **it) {
