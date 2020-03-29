@@ -197,8 +197,9 @@ int parse_header(aig_t *aig) {
   if ((rc = parse_num(aig->source, &aig->and_count)))
     return rc;
 
-  if ((rc = aig->strict ? skip_newline(aig->source)
-                        : skip_whitespace(aig->source)))
+  // unconditionally strictly require a newline to follow, to ensure we fail to
+  // load AIGER 1.9 files for now
+  if ((rc = skip_newline(aig->source)))
     return rc;
 
   return rc;
