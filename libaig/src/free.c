@@ -14,6 +14,7 @@ void aig_free(aig_t **aig) {
 
   bb_reset(&a->latches);
   bb_reset(&a->outputs);
+  bb_reset(&a->ands);
 
   if (a->source != NULL) {
     (void)fclose(a->source);

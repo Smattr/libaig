@@ -31,6 +31,9 @@ struct __attribute__((visibility("internal"))) aig {
   /// output nodes
   bitbuffer_t outputs;
 
+  /// RHS of AND gates
+  bitbuffer_t ands;
+
   /// internal parsing state
   struct {
     enum state {
