@@ -7,7 +7,8 @@
 #include <stdint.h>
 #include <string.h>
 
-int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result) {
+int aig_get_input_no_symbol(aig_t *aig, uint64_t index,
+    struct aig_node *result) {
 
   if (aig == NULL)
     return EINVAL;
@@ -23,12 +24,37 @@ int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result) {
   result->type = AIG_INPUT;
   result->input.variable_index = index + 1;
 
-  // TODO: retrieve name from the symbol table
+  // add the symbol name if we have it
+  uint64_t symtab_index = index;
+  if (aig->symtab != NULL)
+    result->input.name = aig->symtab[symtab_index];
 
   return 0;
 }
 
-int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result) {
+int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result) {
+
+  if (aig == NULL)
+    return EINVAL;
+
+  if (result == NULL)
+    return EINVAL;
+
+  // is this a valid input in this AIG?
+  if (index >= aig->input_count)
+    return ERANGE;
+
+  // ensure the input’s symbol (if it exists) is in memory before looking it up
+  uint64_t symtab_index = index;
+  int rc = parse_symtab(aig, symtab_index);
+  if (rc)
+    return rc;
+
+  return aig_get_input_no_symbol(aig, index, result);
+}
+
+int aig_get_latch_no_symbol(aig_t *aig, uint64_t index,
+    struct aig_node *result) {
 
   if (aig == NULL)
     return EINVAL;
@@ -56,12 +82,37 @@ int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result) {
   result->latch.next = next / 2;
   result->latch.next_negated = next % 2;
 
-  // TODO: retrieve name from the symbol table
+  // add the symbol name if we have it
+  uint64_t symtab_index = index + aig->input_count;
+  if (aig->symtab != NULL)
+    result->latch.name = aig->symtab[symtab_index];
 
   return 0;
 }
 
-int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
+int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result) {
+
+  if (aig == NULL)
+    return EINVAL;
+
+  if (result == NULL)
+    return EINVAL;
+
+  // is this a valid latch in this AIG?
+  if (index >= aig->latch_count)
+    return ERANGE;
+
+  // ensure the latch’s symbol (if it exists) is in memory before looking it up
+  uint64_t symtab_index = index + aig->input_count;
+  int rc = parse_symtab(aig, symtab_index);
+  if (rc)
+    return rc;
+
+  return aig_get_latch_no_symbol(aig, index, result);
+}
+
+int aig_get_output_no_symbol(aig_t *aig, uint64_t index,
+    struct aig_node *result) {
 
   if (aig == NULL)
     return EINVAL;
@@ -88,9 +139,33 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
   result->output.variable_index = o / 2;
   result->output.negated = o % 2;
 
-  // TODO: retrieve name from the symbol table
+  // add the symbol name if we have it
+  uint64_t symtab_index = index + aig->input_count + aig->latch_count;
+  if (aig->symtab != NULL)
+    result->output.name = aig->symtab[symtab_index];
 
   return 0;
+}
+
+int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
+
+  if (aig == NULL)
+    return EINVAL;
+
+  if (result == NULL)
+    return EINVAL;
+
+  // is this a valid output in this AIG?
+  if (index >= aig->output_count)
+    return ERANGE;
+
+  // ensure the output’s symbol (if it exists) is in memory before looking it up
+  uint64_t symtab_index = index + aig->input_count + aig->latch_count;
+  int rc = parse_symtab(aig, symtab_index);
+  if (rc)
+    return rc;
+
+  return aig_get_output_no_symbol(aig, index, result);
 }
 
 int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {

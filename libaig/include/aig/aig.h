@@ -239,6 +239,51 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result);
  */
 int aig_get_node(aig_t *aig, uint64_t variable_index, struct aig_node *result);
 
+/** lookup the input with the given index in this AIG without its symbol
+ *
+ * This is similar to aig_get_input() but will not attempt to further parse the
+ * symbol table from the backing AIG. You will only get symbol information if it
+ * is already in memory. This is effectively an optimised, cheaper version of
+ * aig_get_input() when you do not need symbol information.
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought input
+ * \param result [out] The located input if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_input_no_symbol(aig_t *aig, uint64_t index,
+  struct aig_node *result);
+
+/** lookup the latch with the given index in this AIG without its symbol
+ *
+ * This is similar to aig_get_latch() but will not attempt to further parse the
+ * symbol table from the backing AIG. You will only get symbol information if it
+ * is already in memory. This is effectively an optimised, cheaper version of
+ * aig_get_latch() when you do not need symbol information.
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought latch
+ * \param result [out] The located latch if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_latch_no_symbol(aig_t *aig, uint64_t index,
+  struct aig_node *result);
+
+/** lookup the output with the given index in this AIG without its symbol
+ *
+ * This is similar to aig_get_output() but will not attempt to further parse the
+ * symbol table from the backing AIG. You will only get symbol information if it
+ * is already in memory. This is effectively an optimised, cheaper version of
+ * aig_get_output() when you do not need symbol information.
+ *
+ * \param aig AIG data structure to search
+ * \param index Index of the sought output
+ * \param result [out] The located output if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_output_no_symbol(aig_t *aig, uint64_t index,
+  struct aig_node *result);
+
 /// an opaque handle to an iterator over an AIG’s nodes
 typedef struct aig_node_iter aig_node_iter_t;
 
