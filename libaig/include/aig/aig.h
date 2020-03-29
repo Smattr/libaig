@@ -109,10 +109,10 @@ struct aig_node {
   /// type of this node
   enum aig_node_type type;
 
-  /// index in its containing AIG
-  uint64_t index;
+  /// variable index in its containing AIG (for inputs, latches, AND gates)
+  uint64_t variable_index;
 
-  /// optional name from the AIG’s symbol table
+  /// optional name from the AIG’s symbol table (for inputs, latches, outputs)
   const char *name;
 
   union {
@@ -120,11 +120,22 @@ struct aig_node {
     // fields that are relevant for latches
     struct {
 
-      /// current state of this latch
-      uint64_t current;
-
-      /// next state of this latch
+      /// index of next state of this latch
       uint64_t next;
+
+      /// whether there is an inverter
+      bool next_negated;
+
+    };
+
+    // fields that are relevant for outputs
+    struct {
+
+      /// index of the output
+      uint64_t output;
+
+      /// where it is inverted
+      bool output_negated;
 
     };
 
@@ -138,7 +149,7 @@ struct aig_node {
       uint64_t rhs[2];
 
       /// whether each input is negated
-      bool negated[2];
+      bool rhs_negated[2];
 
     };
   };

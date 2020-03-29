@@ -21,7 +21,7 @@ int aig_iter(aig_t *aig, aig_node_iter_t **it) {
 
   // set it up to point at the start of this AIG
   i->aig = aig;
-  i->index = 1;
+  i->index = 0;
 
   *it = i;
   return 0;
@@ -38,7 +38,7 @@ bool aig_iter_has_next(const aig_node_iter_t *it) {
   const aig_t *aig = it->aig;
 
   // if the current index is out of range, we are exhausted
-  if (it->index > aig->input_count + aig->latch_count + aig->and_count
+  if (it->index >= aig->input_count + aig->latch_count + aig->and_count
       + aig->output_count)
     return false;
 
@@ -57,38 +57,38 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
   if (item == NULL)
     return EINVAL;
 
-  assert(it->index != 0 && "invalid iterator state");
   assert(it->aig != NULL && "invalid iterator state");
 
+  uint64_t index = it->index;
+
   // are we currently pointing at an input?
-  if (it->index <= it->aig->input_count) {
-    int rc = aig_get_input(it->aig, it->index, item);
+  if (index < it->aig->input_count) {
+    int rc = aig_get_input(it->aig, index, item);
     it->index++;
     return rc;
   }
+  index -= it->aig->input_count;
 
   // are we currently pointing at a latch?
-  if (it->index <= it->aig->input_count + it->aig->latch_count) {
-    int rc = aig_get_latch(it->aig, it->index, item);
+  if (index < it->aig->latch_count) {
+    int rc = aig_get_latch(it->aig, index, item);
     it->index++;
     return rc;
   }
+  index -= it->aig->latch_count;
 
-  // are we currently pointing at an AND gate?
-  if (it->index <= it->aig->input_count + it->aig->latch_count
-      + it->aig->and_count) {
-    // TODO
-    return ENOTSUP;
+  // are we currently pointing at an output?
+  if (index < it->aig->output_count) {
+    int rc = aig_get_output(it->aig, index, item);
+    it->index++;
+    return rc;
   }
+  index -= it->aig->output_count;
 
-  // if we have reached here, we must be up to an output
-  assert(it->index <= it->aig->input_count + it->aig->latch_count +
-    it->aig->and_count + it->aig->output_count &&
-    "incorrect aig_iter_next() logic");
+  // if we have reached here, we must be up to an AND gate
+  assert(index < it->aig->and_count && "incorrect aig_iter_next() logic");
 
-  int rc = aig_get_output(it->aig, it->index, item);
-  it->index++;
-  return rc;
+  return ENOTSUP;
 }
 
 void aig_iter_free(aig_node_iter_t **it) {

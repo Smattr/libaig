@@ -16,14 +16,12 @@ int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result) {
     return EINVAL;
 
   // is this a valid input in this AIG?
-  if (index == 0)
-    return ERANGE;
-  if (index > aig->input_count)
+  if (index >= aig->input_count)
     return ERANGE;
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_INPUT;
-  result->index = index;
+  result->variable_index = index + 1;
 
   // TODO: retrieve name from the symbol table
 
@@ -39,27 +37,24 @@ int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result) {
     return EINVAL;
 
   // is this a valid latch in this AIG?
-  if (index <= aig->input_count)
-    return ERANGE;
-  if (index > aig->input_count + aig->latch_count)
+  if (index >= aig->latch_count)
     return ERANGE;
 
   // ensure we have this latch’s data available
-  int rc = parse_latches(aig, index + 1);
+  int rc = parse_latches(aig, index);
   if (rc)
     return rc;
 
   // retrieve the latch’s next state
   uint64_t next;
-  uint64_t buffer_index = index - aig->input_count - 1;
-  if ((rc = bb_get(&aig->latches, buffer_index, bb_limit(aig), &next)))
+  if ((rc = bb_get(&aig->latches, index, bb_limit(aig), &next)))
     return rc;
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_LATCH;
-  result->index = index;
-  result->current = index;
-  result->next = next;
+  result->variable_index = index + 1 + aig->input_count;
+  result->next = next / 2;
+  result->next_negated = next % 2;
 
   // TODO: retrieve name from the symbol table
 
@@ -75,14 +70,23 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
     return EINVAL;
 
   // is this a valid output in this AIG?
-  if (index <= aig->input_count + aig->latch_count)
+  if (index >= aig->output_count)
     return ERANGE;
-  if (index > aig->input_count + aig->latch_count + aig->output_count)
-    return ERANGE;
+
+  // ensure we have this output’s data available
+  int rc = parse_latches(aig, index);
+  if (rc)
+    return rc;
+
+  // retrieve the output’s next state
+  uint64_t o;
+  if ((rc = bb_get(&aig->outputs, index, bb_limit(aig), &o)))
+    return rc;
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_OUTPUT;
-  result->index = index;
+  result->output = o / 2;
+  result->output_negated = o % 2;
 
   // TODO: retrieve name from the symbol table
 

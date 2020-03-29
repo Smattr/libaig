@@ -216,7 +216,7 @@ int parse_inputs(aig_t *aig, uint64_t upto) {
   if (aig->binary)
     return 0;
 
-  for (uint64_t i = aig->index; i < aig->input_count + 1 && i <= upto; i++) {
+  for (uint64_t i = aig->index; i < aig->input_count && i <= upto; i++) {
 
     // in non-strict mode, ignore leading white space
     if (!aig->strict)
@@ -230,7 +230,7 @@ int parse_inputs(aig_t *aig, uint64_t upto) {
 
     // we already know what it should be, so fail in strict mode if there is a
     // mismatch
-    if (aig->strict && n != 2 * i)
+    if (aig->strict && n != 2 * (i + 1))
       return EILSEQ;
 
     rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
@@ -253,7 +253,7 @@ int parse_latches(aig_t *aig, uint64_t upto) {
     if (rc)
       return rc;
     aig->state = IN_LATCHES;
-    aig->index = aig->input_count + 1;
+    aig->index = 0;
   }
 
   // have we already read past the given index?
@@ -262,9 +262,7 @@ int parse_latches(aig_t *aig, uint64_t upto) {
   if (aig->state == IN_LATCHES && aig->index > upto)
     return 0;
 
-  for (uint64_t i = aig->index;
-       i < aig->input_count + aig->latch_count + 1 && i <= upto;
-       i++) {
+  for (uint64_t i = aig->index; i < aig->latch_count && i <= upto; i++) {
 
     // in non-strict mode, ignore leading white space
     if (!aig->strict)
@@ -281,7 +279,7 @@ int parse_latches(aig_t *aig, uint64_t upto) {
 
       // we already know what the current state should be, so fail in strict
       // mode if there is a mismatch
-      if (aig->strict && n != 2 * i)
+      if (aig->strict && n != 2 * (i + 1 + aig->input_count))
         return EILSEQ;
     }
 

@@ -18,7 +18,7 @@ static int load(aig_t *aig) {
     return rc;
 
   aig->state = IN_INPUTS;
-  aig->index = 1;
+  aig->index = 0;
 
   // if we are parsing lazily, leave the remainder of the file to later
   if (!aig->eager)
