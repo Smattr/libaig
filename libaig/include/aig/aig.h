@@ -109,6 +109,7 @@ uint64_t aig_and_count(const aig_t *aig);
 
 /// the type of an AIG node
 enum aig_node_type {
+  AIG_CONSTANT,
   AIG_INPUT,
   AIG_LATCH,
   AIG_OUTPUT,
@@ -121,16 +122,32 @@ struct aig_node {
   /// type of this node
   enum aig_node_type type;
 
-  /// variable index in its containing AIG (for inputs, latches, AND gates)
-  uint64_t variable_index;
-
-  /// optional name from the AIG’s symbol table (for inputs, latches, outputs)
-  const char *name;
-
   union {
+
+    // fields that are relevant for constants
+    struct {
+
+      /// is this the constant TRUE (as opposed to FALSE)?
+      bool is_true;
+
+    } constant;
+
+    // fields that are relevant for inputs
+    struct {
+
+      /// variable index in its containing AIG
+      uint64_t variable_index;
+
+      /// optional name from the AIG’s symbol table
+      const char *name;
+
+    } input;
 
     // fields that are relevant for latches
     struct {
+
+      /// variable index in its containing AIG
+      uint64_t current;
 
       /// index of next state of this latch
       uint64_t next;
@@ -138,29 +155,38 @@ struct aig_node {
       /// whether there is an inverter
       bool next_negated;
 
-    };
+      /// optional name from the AIG’s symbol table
+      const char *name;
+
+    } latch;
 
     // fields that are relevant for outputs
     struct {
 
       /// index of the output
-      uint64_t output;
+      uint64_t variable_index;
 
       /// where it is inverted
-      bool output_negated;
+      bool negated;
 
-    };
+      /// optional name from the AIG’s symbol table
+      const char *name;
+
+    } output;
 
     // fields that are relevant for AND gates
     struct {
+
+      /// ouput index
+      uint64_t lhs;
 
       /// input indices of this AND gate
       uint64_t rhs[2];
 
       /// whether each input is negated
-      bool rhs_negated[2];
+      bool negated[2];
 
-    };
+    } and_gate;
   };
 };
 

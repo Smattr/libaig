@@ -43,23 +43,28 @@ int main(int argc, char **argv) {
 
     switch (n.type) {
 
+      // constants are not generated during a node iteration
+      case AIG_CONSTANT:
+        __builtin_unreachable();
+
       case AIG_INPUT:
-        printf("%" PRIu64 "\n", n.variable_index * 2);
+        printf("%" PRIu64 "\n", n.input.variable_index * 2);
         break;
 
       case AIG_LATCH:
-        printf("%" PRIu64 " %" PRIu64 "\n", n.variable_index * 2,
-          n.next * 2 + (n.next_negated ? 1 : 0));
+        printf("%" PRIu64 " %" PRIu64 "\n", n.latch.current * 2,
+          n.latch.next * 2 + (n.latch.next_negated ? 1 : 0));
         break;
 
       case AIG_OUTPUT:
-        printf("%" PRIu64 "\n", n.output * 2 + (n.output_negated ? 1 : 0));
+        printf("%" PRIu64 "\n",
+          n.output.variable_index * 2 + (n.output.negated ? 1 : 0));
         break;
 
       case AIG_AND_GATE:
-        printf("%" PRIu64 " %" PRIu64 " %" PRIu64 "\n", n.variable_index * 2,
-          n.rhs[0] * 2 + (n.rhs_negated[0] ? 1 : 0),
-          n.rhs[1] * 2 + (n.rhs_negated[1] ? 1 : 0));
+        printf("%" PRIu64 " %" PRIu64 " %" PRIu64 "\n", n.and_gate.lhs * 2,
+          n.and_gate.rhs[0] * 2 + (n.and_gate.negated[0] ? 1 : 0),
+          n.and_gate.rhs[1] * 2 + (n.and_gate.negated[1] ? 1 : 0));
         break;
 
     }

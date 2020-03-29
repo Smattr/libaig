@@ -21,7 +21,7 @@ int aig_get_input(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_INPUT;
-  result->variable_index = index + 1;
+  result->input.variable_index = index + 1;
 
   // TODO: retrieve name from the symbol table
 
@@ -52,9 +52,9 @@ int aig_get_latch(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_LATCH;
-  result->variable_index = index + 1 + aig->input_count;
-  result->next = next / 2;
-  result->next_negated = next % 2;
+  result->latch.current = index + 1 + aig->input_count;
+  result->latch.next = next / 2;
+  result->latch.next_negated = next % 2;
 
   // TODO: retrieve name from the symbol table
 
@@ -85,8 +85,8 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_OUTPUT;
-  result->output = o / 2;
-  result->output_negated = o % 2;
+  result->output.variable_index = o / 2;
+  result->output.negated = o % 2;
 
   // TODO: retrieve name from the symbol table
 
@@ -119,11 +119,11 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_AND_GATE;
-  result->variable_index = index + 1 + aig->input_count + aig->latch_count;
-  result->rhs[0] = rhs0 / 2;
-  result->rhs[1] = rhs1 / 2;
-  result->rhs_negated[0] = rhs0 % 2;
-  result->rhs_negated[1] = rhs1 % 2;
+  result->and_gate.lhs = index + 1 + aig->input_count + aig->latch_count;
+  result->and_gate.rhs[0] = rhs0 / 2;
+  result->and_gate.rhs[1] = rhs1 / 2;
+  result->and_gate.negated[0] = rhs0 % 2;
+  result->and_gate.negated[1] = rhs1 % 2;
 
   return 0;
 }
