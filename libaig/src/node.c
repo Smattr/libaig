@@ -119,6 +119,7 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_AND_GATE;
+  result->variable_index = index + 1 + aig->input_count + aig->latch_count;
   result->rhs[0] = rhs0 / 2;
   result->rhs[1] = rhs1 / 2;
   result->rhs_negated[0] = rhs0 % 2;
