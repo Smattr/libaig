@@ -59,37 +59,14 @@ int aig_load(aig_t **aig, const char *filename, struct aig_options options) {
   if (filename == NULL)
     return EINVAL;
 
-  int rc = 0;
+  FILE *f = fopen(filename, "r");
+  if (f == NULL)
+    return errno;
 
-  aig_t *a = NULL;
-  if ((rc = aig_new(&a, options)))
-    goto done;
+  int rc = aig_loadf(aig, f, options);
 
-  a->source = fopen(filename, "r");
-  if (a->source == NULL) {
-    rc = errno;
-    goto done;
-  }
-
-  a->strict = options.strict;
-  a->eager = options.eager;
-
-  if ((rc = load(a)))
-    goto done;
-
-done:
-  if (rc == 0) {
-    *aig = a;
-  } else {
-    if (a != NULL) {
-      if (a->source != NULL) {
-        (void)fclose(a->source);
-        a->source = NULL;
-      }
-    }
-    free(a);
-    a = NULL;
-  }
+  if (rc)
+    fclose(f);
 
   return rc;
 }
