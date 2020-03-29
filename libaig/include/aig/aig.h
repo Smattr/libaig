@@ -226,6 +226,19 @@ int aig_get_output(aig_t *aig, uint64_t index, struct aig_node *result);
  */
 int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result);
 
+/** lookup a node by variable index
+ *
+ * Rather than giving an index within a particular category of node like
+ * aig_get_input(), aig_get_latch(), and aig_get_and(), this function allows you
+ * to retrieve any type of node by its variable index.
+ *
+ * \param aig AIG data structure to search
+ * \param variable_index Index of the sought node
+ * \param result [out] The located node if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_get_node(aig_t *aig, uint64_t variable_index, struct aig_node *result);
+
 /// an opaque handle to an iterator over an AIG’s nodes
 typedef struct aig_node_iter aig_node_iter_t;
 

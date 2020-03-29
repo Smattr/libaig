@@ -127,3 +127,35 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   return 0;
 }
+
+int aig_get_node(aig_t *aig, uint64_t variable_index, struct aig_node *result) {
+
+  if (aig == NULL)
+    return EINVAL;
+
+  if (result == NULL)
+    return EINVAL;
+
+  uint64_t i = variable_index;
+
+  // index 0 is the constant FALSE
+  if (i == 0) {
+    memset(result, 0, sizeof(*result));
+    result->type = AIG_CONSTANT;
+    return 0;
+  }
+  i--;
+
+  if (i < aig->input_count)
+    return aig_get_input(aig, i, result);
+  i -= aig->input_count;
+
+  if (i < aig->latch_count)
+    return aig_get_latch(aig, i, result);
+  i -= aig->latch_count;
+
+  if (i < aig->and_count)
+    return aig_get_and(aig, i, result);
+
+  return ERANGE;
+}
