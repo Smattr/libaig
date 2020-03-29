@@ -32,20 +32,8 @@ static int load(aig_t *aig) {
   if (!aig->eager)
     return rc;
 
-  // parse the entire input section
-  if ((rc = parse_inputs(aig, UINT64_MAX)))
-    return rc;
-
-  // parse the entire latch section
-  if ((rc = parse_latches(aig, UINT64_MAX)))
-    return rc;
-
-  // parse the entire output section
-  if ((rc = parse_outputs(aig, UINT64_MAX)))
-    return rc;
-
-  // parse the entire AND gate section
-  if ((rc = parse_ands(aig, UINT64_MAX)))
+  // parse the other sections in the file
+  if ((rc = parse_all(aig)))
     return rc;
 
   return rc;
