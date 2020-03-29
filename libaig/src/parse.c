@@ -363,3 +363,103 @@ int parse_outputs(aig_t *aig, uint64_t upto) {
 
   return 0;
 }
+
+static int parse_and_ascii(aig_t *aig, uint64_t index) {
+
+  assert(aig != NULL);
+
+  // in non-strict mode, ignore leading white space
+  if (!aig->strict)
+    (void)skip_whitespace(aig->source);
+
+  // parse the index of the AND gate
+  uint64_t lhs;
+  int rc = parse_num(aig->source, &lhs);
+  if (rc)
+    return rc;
+
+  // we already know the expected index, so fail in strict mode if this
+  // mismatches
+  if (aig->strict) {
+    if (lhs != 2 * (index + aig->input_count + aig->latch_count + 1))
+      return EILSEQ;
+  }
+
+  rc = aig->strict ? skip_space(aig->source) : skip_whitespace(aig->source);
+  if (rc)
+    return rc;
+
+  // read the first operand
+  uint64_t rhs0;
+  if ((rc = parse_num(aig->source, &rhs0)))
+    return rc;
+
+  // is this an encoding of a legal variable index?
+  if (rhs0 > bb_limit(aig))
+    return ERANGE;
+
+  rc = aig->strict ? skip_space(aig->source) : skip_whitespace(aig->source);
+  if (rc)
+    return rc;
+
+  // read the second operand
+  uint64_t rhs1;
+  if ((rc = parse_num(aig->source, &rhs1)))
+    return rc;
+
+  // is this an encoding of a legal variable index?
+  if (rhs1 > bb_limit(aig))
+    return ERANGE;
+
+  // read the line terminator
+  rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
+  if (rc)
+    return rc;
+
+  // store these values in the AND gates array
+  if ((rc = bb_append(&aig->ands, rhs0, bb_limit(aig))))
+    return rc;
+  if ((rc = bb_append(&aig->ands, rhs1, bb_limit(aig))))
+    return rc;
+
+  return 0;
+}
+
+static int parse_and_binary(aig_t *aig, uint64_t index) {
+  (void)aig;
+  (void)index;
+  return ENOTSUP;
+}
+
+static int parse_and(aig_t *aig, uint64_t index) {
+  return aig->binary ? parse_and_binary(aig, index)
+                     : parse_and_ascii(aig, index);
+}
+
+int parse_ands(aig_t *aig, uint64_t upto) {
+
+  // if we have not yet parsed inputs, latches, and outputs we need to first
+  // parse those sections
+  if (aig->state < IN_ANDS) {
+    int rc = parse_outputs(aig, UINT64_MAX);
+    if (rc)
+      return rc;
+    aig->state = IN_ANDS;
+    aig->index = 0;
+  }
+
+  // have we already read past the given index?
+  if (aig->state > IN_ANDS)
+    return 0;
+  if (aig->state == IN_ANDS && aig->index > upto)
+    return 0;
+
+  for (uint64_t i = aig->index; i < aig->and_count && i <= upto; i++) {
+    int rc = parse_and(aig, i);
+    if (rc)
+      return rc;
+    aig->index = i;
+  }
+
+  return 0;
+}
