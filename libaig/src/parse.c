@@ -216,7 +216,8 @@ int parse_inputs(aig_t *aig, uint64_t upto) {
   if (aig->binary)
     return 0;
 
-  for (uint64_t i = aig->index; i < aig->input_count && i <= upto; i++) {
+  for (; aig->index < aig->input_count && aig->index <= upto; aig->index++) {
+    uint64_t i = aig->index;
 
     // in non-strict mode, ignore leading white space
     if (!aig->strict)
@@ -236,8 +237,6 @@ int parse_inputs(aig_t *aig, uint64_t upto) {
     rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
     if (rc)
       return rc;
-
-    aig->index = i;
   }
 
   return 0;
@@ -264,7 +263,8 @@ int parse_latches(aig_t *aig, uint64_t upto) {
 
   int rc = 0;
 
-  for (uint64_t i = aig->index; i < aig->latch_count && i <= upto; i++) {
+  for (; aig->index < aig->latch_count && aig->index <= upto; aig->index++) {
+    uint64_t i = aig->index;
 
     // in non-strict mode, ignore leading white space
     if (!aig->strict)
@@ -307,8 +307,6 @@ int parse_latches(aig_t *aig, uint64_t upto) {
     // store the parsed value in the latch array
     if ((rc = bb_append(&aig->latches, next, bb_limit(aig))))
       return rc;
-
-    aig->index = i;
   }
 
   return 0;
@@ -334,7 +332,7 @@ int parse_outputs(aig_t *aig, uint64_t upto) {
   if (aig->state == IN_OUTPUTS && aig->index > upto)
     return 0;
 
-  for (uint64_t i = aig->index; i < aig->output_count && i <= upto; i++) {
+  for (; aig->index < aig->output_count && aig->index <= upto; aig->index++) {
 
     // in non-strict mode, ignore leading white space
     if (!aig->strict)
@@ -358,8 +356,6 @@ int parse_outputs(aig_t *aig, uint64_t upto) {
     // store the parsed value in the output array
     if ((rc = bb_append(&aig->outputs, o, bb_limit(aig))))
       return rc;
-
-    aig->index = i;
   }
 
   return 0;
@@ -455,11 +451,10 @@ int parse_ands(aig_t *aig, uint64_t upto) {
   if (aig->state == IN_ANDS && aig->index > upto)
     return 0;
 
-  for (uint64_t i = aig->index; i < aig->and_count && i <= upto; i++) {
-    int rc = parse_and(aig, i);
+  for (; aig->index < aig->and_count && aig->index <= upto; aig->index++) {
+    int rc = parse_and(aig, aig->index);
     if (rc)
       return rc;
-    aig->index = i;
   }
 
   return 0;
