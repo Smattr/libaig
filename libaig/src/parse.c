@@ -376,13 +376,6 @@ static int parse_and_ascii(aig_t *aig, uint64_t index) {
   if (rc)
     return rc;
 
-  // we already know the expected index, so fail in strict mode if this
-  // mismatches
-  if (aig->strict) {
-    if (lhs != 2 * (index + aig->input_count + aig->latch_count + 1))
-      return EILSEQ;
-  }
-
   rc = aig->strict ? skip_space(aig->source) : skip_whitespace(aig->source);
   if (rc)
     return rc;
@@ -414,7 +407,27 @@ static int parse_and_ascii(aig_t *aig, uint64_t index) {
   if (rc)
     return rc;
 
-  // store these values in the AND gates array
+  // if this AND gate’s LHS is out of the expected (and inferable) sequence or
+  // we have existing LHS data indicating that a prior gate had an LHS out of
+  // sequence, we will need to add it to the aig->and_lhs array
+  if (lhs != get_inferred_and_lhs(aig, index) || !bb_is_empty(&aig->and_lhs)) {
+
+    // if we have no LHS data, every AND gate before this one had an inferable
+    // LHS, so we need to construct all this data now
+    if (bb_is_empty(&aig->and_lhs)) {
+      for (uint64_t i = 0; i < index; i++) {
+        uint64_t l = get_inferred_and_lhs(aig, i);
+        if ((rc = bb_append(&aig->and_lhs, l, bb_limit(aig))))
+          return rc;
+      }
+    }
+
+    // store the current LHS
+    if ((rc = bb_append(&aig->and_lhs, lhs, bb_limit(aig))))
+      return rc;
+  }
+
+  // store the RHSs values in the AND gates array
   if ((rc = bb_append(&aig->and_rhs, rhs0, bb_limit(aig))))
     return rc;
   if ((rc = bb_append(&aig->and_rhs, rhs1, bb_limit(aig))))

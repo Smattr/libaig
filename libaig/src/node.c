@@ -185,6 +185,23 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
   if (rc)
     return rc;
 
+  // retrieve the AND gate’s LHS
+  uint64_t lhs;
+  if (aig->binary) {
+    // for a binary AIG, we can infer the LHS because the AND gates are ordered
+    // and consecutive
+    lhs = get_inferred_and_lhs(aig, index);
+  } else {
+    // for an ASCII AIG, the LHS is either inferable, in which case we have no
+    // LHS data, or it is stored in a bit buffer
+    if (bb_is_empty(&aig->and_lhs)) { // inferable
+      lhs = get_inferred_and_lhs(aig, index);
+    } else { // stored
+      if ((rc = bb_get(&aig->and_lhs, index, bb_limit(aig), &lhs)))
+        return rc;
+    }
+  }
+
   // retrieve the AND gate’s RHS
   uint64_t rhs0, rhs1;
   if ((rc = bb_get(&aig->and_rhs, index * 2, bb_limit(aig), &rhs0)))
@@ -194,7 +211,7 @@ int aig_get_and(aig_t *aig, uint64_t index, struct aig_node *result) {
 
   memset(result, 0, sizeof(*result));
   result->type = AIG_AND_GATE;
-  result->and_gate.lhs = index + 1 + aig->input_count + aig->latch_count;
+  result->and_gate.lhs = lhs / 2;
   result->and_gate.rhs[0] = rhs0 / 2;
   result->and_gate.rhs[1] = rhs1 / 2;
   result->and_gate.negated[0] = rhs0 % 2;
