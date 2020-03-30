@@ -14,6 +14,7 @@ void aig_free(aig_t **aig) {
   aig_t *a = *aig;
 
   bb_reset(&a->inputs);
+  bb_reset(&a->latch_current);
   bb_reset(&a->latch_next);
   bb_reset(&a->outputs);
   bb_reset(&a->and_lhs);

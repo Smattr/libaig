@@ -29,6 +29,9 @@ struct __attribute__((visibility("internal"))) aig {
   /// inputs if not inferable
   bitbuffer_t inputs;
 
+  /// current state values for each latch
+  bitbuffer_t latch_current;
+
   /// next state values for each latch
   bitbuffer_t latch_next;
 
