@@ -70,3 +70,8 @@ uint64_t get_and_lhs(const aig_t *aig, uint64_t index) {
 
   return lhs;
 }
+
+size_t get_symtab_size(const aig_t *aig) {
+  assert(aig != NULL);
+  return (size_t)(aig->input_count + aig->latch_count + aig->output_count);
+}

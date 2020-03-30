@@ -2,6 +2,7 @@
 
 #include <aig/aig.h>
 #include "aig_t.h"
+#include <stddef.h>
 #include <stdint.h>
 
 /** get the input that would be inferred from an input’s position
@@ -57,3 +58,11 @@ uint64_t get_inferred_and_lhs(const aig_t *aig, uint64_t index);
  */
 __attribute__((visibility("internal")))
 uint64_t get_and_lhs(const aig_t *aig, uint64_t index);
+
+/** get inferred size of the symbol table
+ *
+ * \param aig Struct to examine
+ * \returns The inferred size of the symbol table
+ */
+__attribute__((visibility("internal")))
+size_t get_symtab_size(const aig_t *aig);

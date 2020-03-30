@@ -526,7 +526,7 @@ int parse_symtab(aig_t *aig, uint64_t upto) {
   if (aig->state > IN_SYMTAB)
     return 0;
 
-  size_t symtab_size = aig->input_count + aig->latch_count + aig->output_count;
+  size_t symtab_size = get_symtab_size(aig);
 
   // if we are seeking something in range of the symbol table, see if we already
   // have it
