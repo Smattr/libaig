@@ -39,6 +39,7 @@ typedef struct __attribute__((visibility("internal"))) {
  * \param limit Largest item value the buffer ever needs to hold
  * \returns 0 on success or an errno on failure
  */
+__attribute__((visibility("internal")))
 int bb_append(bitbuffer_t *bb, uint64_t value, uint64_t limit);
 
 /** retrieve an item from the buffer
@@ -49,6 +50,7 @@ int bb_append(bitbuffer_t *bb, uint64_t value, uint64_t limit);
  * \param value [out] The value retrieved on success
  * \returns 0 on success or an errno on failure
  */
+__attribute__((visibility("internal")))
 int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
   uint64_t *value);
 
@@ -57,6 +59,7 @@ int bb_get(const bitbuffer_t *bb, uint64_t index, uint64_t limit,
  * \param bb The buffer to check
  * \returns true if empty
  */
+__attribute__((visibility("internal")))
 bool bb_is_empty(const bitbuffer_t *bb);
 
 /** remove all items and clear the state of a buffer
@@ -66,4 +69,5 @@ bool bb_is_empty(const bitbuffer_t *bb);
  *
  * \param bb The buffer to operate on
  */
+__attribute__((visibility("internal")))
 void bb_reset(bitbuffer_t *bb);
