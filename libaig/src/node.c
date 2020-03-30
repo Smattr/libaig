@@ -2,6 +2,7 @@
 #include "aig_t.h"
 #include "bitbuffer.h"
 #include <errno.h>
+#include "infer.h"
 #include "parse.h"
 #include <stddef.h>
 #include <stdint.h>

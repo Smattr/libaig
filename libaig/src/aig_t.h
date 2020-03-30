@@ -1,5 +1,6 @@
 #pragma once
 
+#include <aig/aig.h>
 #include <assert.h>
 #include "bitbuffer.h"
 #include <stdio.h>
@@ -74,37 +75,4 @@ static inline uint64_t bb_limit(const aig_t *aig) {
   // the bit buffers store elements that are representations of possibly-negated
   // variable indices as they appear in the AIGER file format
   return aig->max_index * 2 + 1;
-}
-
-/** get the LHS that would be inferred from an AND gate
- *
- * \param aig Structure to examine
- * \param index Index of the AND gate
- * \returns The inferred encoded LHS of this AND gate
- */
-static inline uint64_t get_inferred_and_lhs(const aig_t *aig, uint64_t index) {
-  assert(aig != NULL);
-  return (1 + aig->input_count + aig->latch_count + index) * 2;
-}
-
-/** get the LHS of an already-parsed AND gate
- *
- * \param aig Structure to examine
- * \param index Index of the AND gate to lookup
- * \returns The encoded LHS of this AND gate
- */
-static inline uint64_t get_and_lhs(const aig_t *aig, uint64_t index) {
-  assert(aig != NULL);
-
-  // if the AIG has no LHS data, the LHS was deemed inferable
-  if (bb_is_empty(&aig->and_lhs))
-    return get_inferred_and_lhs(aig, index);
-
-  // otherwise it should be in the LHS array
-  uint64_t lhs;
-  int rc __attribute__((unused))
-    = bb_get(&aig->and_lhs, index, bb_limit(aig), &lhs);
-  assert(rc == 0);
-
-  return lhs;
 }

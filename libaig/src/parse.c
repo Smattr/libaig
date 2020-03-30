@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include "infer.h"
 #include <limits.h>
 #include "parse.h"
 #include <stdbool.h>
