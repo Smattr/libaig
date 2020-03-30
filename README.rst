@@ -94,8 +94,7 @@ Example usage:
     }
   
     // clean up
-    if (it != NULL)
-      aig_iter_free(&it);
+    aig_iter_free(&it);
     aig_free(&aig);
   
     return EXIT_SUCCESS;
