@@ -4,6 +4,7 @@ add_library(libaig
   src/getters.c
   src/infer.c
   src/load.c
+  src/lookup.c
   src/new.c
   src/node.c
   src/node_iter.c

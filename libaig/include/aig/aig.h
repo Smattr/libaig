@@ -284,6 +284,15 @@ int aig_get_latch_no_symbol(aig_t *aig, uint64_t index,
 int aig_get_output_no_symbol(aig_t *aig, uint64_t index,
   struct aig_node *result);
 
+/** lookup a node by name
+ *
+ * \param aig AIG data structure to search
+ * \param name Symbol name of the node being sought
+ * \param result [out] The located output if successful
+ * \returns 0 on success or an errno on failure
+ */
+int aig_lookup_node(aig_t *aig, const char *name, struct aig_node *result);
+
 /// an opaque handle to an iterator over an AIG’s nodes
 typedef struct aig_node_iter aig_node_iter_t;
 
