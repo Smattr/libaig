@@ -28,6 +28,28 @@ uint64_t get_input(const aig_t *aig, uint64_t index) {
   return input;
 }
 
+uint64_t get_inferred_latch_current(const aig_t *aig, uint64_t index) {
+  assert(aig != NULL);
+  return (1 + aig->input_count + index) * 2;
+}
+
+uint64_t get_latch_current(const aig_t *aig, uint64_t index) {
+  assert(aig != NULL);
+
+  // if the AIG has no latch current data, the current value was deemed
+  // inferable
+  if (bb_is_empty(&aig->latch_current))
+    return get_inferred_latch_current(aig, index);
+
+  // otherwise it should be in the latch current array;
+  uint64_t current;
+  int rc __attribute__((unused))
+    = bb_get(&aig->latch_current, index, bb_limit(aig), &current);
+  assert(rc == 0);
+
+  return current;
+}
+
 uint64_t get_inferred_and_lhs(const aig_t *aig, uint64_t index) {
   assert(aig != NULL);
   return (1 + aig->input_count + aig->latch_count + index) * 2;
