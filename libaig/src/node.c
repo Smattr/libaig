@@ -82,7 +82,7 @@ int aig_get_latch_no_symbol(aig_t *aig, uint64_t index,
 
   // retrieve the latch’s next state
   uint64_t next;
-  if ((rc = bb_get(&aig->latches, index, bb_limit(aig), &next)))
+  if ((rc = bb_get(&aig->latch_next, index, bb_limit(aig), &next)))
     return rc;
 
   memset(result, 0, sizeof(*result));

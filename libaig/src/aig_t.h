@@ -30,7 +30,7 @@ struct __attribute__((visibility("internal"))) aig {
   bitbuffer_t inputs;
 
   /// next state values for each latch
-  bitbuffer_t latches;
+  bitbuffer_t latch_next;
 
   /// output nodes
   bitbuffer_t outputs;
