@@ -26,6 +26,9 @@ struct __attribute__((visibility("internal"))) aig {
   /// input file (or in-memory buffer) AIG was read from
   FILE *source;
 
+  /// inputs if not inferable
+  bitbuffer_t inputs;
+
   /// next state values for each latch
   bitbuffer_t latches;
 
