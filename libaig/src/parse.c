@@ -288,18 +288,16 @@ int parse_latches(aig_t *aig, uint64_t upto) {
     if (!aig->strict)
       (void)skip_whitespace(aig->source);
 
-    // the current state of the latch is only present in the ASCII format
-    if (!aig->binary) {
+    uint64_t current;
+    // the current state of the latch can be inferred in the binary format
+    if (aig->binary) {
+      current = get_inferred_latch_current(aig, i);
+
+    } else {
 
       // parse the current state of the latch
-      uint64_t n;
-      if ((rc = parse_num(aig->source, &n)))
+      if ((rc = parse_num(aig->source, &current)))
         return rc;
-
-      // we already know what the current state should be, so fail in strict
-      // mode if there is a mismatch
-      if (aig->strict && n != 2 * (i + 1 + aig->input_count))
-        return EILSEQ;
 
       rc = aig->strict ? skip_space(aig->source)
                        : skip_whitespace(aig->source);
@@ -321,6 +319,28 @@ int parse_latches(aig_t *aig, uint64_t upto) {
     rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
     if (rc)
       return rc;
+
+    // if this latch’s current value is out of the expected (and inferable)
+    // sequence or we have existing latch current data indicating that a prior
+    // latch had a current value out of sequence, we will need to add it to the
+    // aig->latch_current array
+    if (current != get_inferred_latch_current(aig, i)
+        || !bb_is_empty(&aig->latch_current)) {
+
+      // if we have no latch current data, every latch before this one had an
+      // inferable current value, so we need to construct all this data now
+      if (bb_is_empty(&aig->latch_current)) {
+        for (uint64_t j = 0; j < i; j++) {
+          uint64_t c = get_inferred_latch_current(aig, j);
+          if ((rc = bb_append(&aig->latch_current, c, bb_limit(aig))))
+            return rc;
+        }
+      }
+
+      // store this latch’s current value
+      if ((rc = bb_append(&aig->latch_current, current, bb_limit(aig))))
+        return rc;
+    }
 
     // store the parsed value in the latch array
     if ((rc = bb_append(&aig->latch_next, next, bb_limit(aig))))
