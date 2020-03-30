@@ -21,9 +21,17 @@ int aig_get_input_no_symbol(aig_t *aig, uint64_t index,
   if (index >= aig->input_count)
     return ERANGE;
 
+  // ensure we have this input’s data available
+  int rc = parse_inputs(aig, index);
+  if (rc)
+    return rc;
+
+  // retrieve the encoded index of the input
+  uint64_t input = get_input(aig, index);
+
   memset(result, 0, sizeof(*result));
   result->type = AIG_INPUT;
-  result->input.variable_index = index + 1;
+  result->input.variable_index = input / 2;
 
   // add the symbol name if we have it
   uint64_t symtab_index = index;

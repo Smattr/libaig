@@ -231,14 +231,30 @@ int parse_inputs(aig_t *aig, uint64_t upto) {
     if (rc)
       return rc;
 
-    // we already know what it should be, so fail in strict mode if there is a
-    // mismatch
-    if (aig->strict && n != 2 * (i + 1))
-      return EILSEQ;
-
+    // read the line terminator
     rc = aig->strict ? skip_newline(aig->source) : skip_whitespace(aig->source);
     if (rc)
       return rc;
+
+    // if this input’s index is out of the expected (and inferable) sequence or
+    // we have existing input data indicating that a prior input had an index
+    // out of sequence, we will need to add it to the aig->inputs array
+    if (n != get_inferred_input(aig, i) || !bb_is_empty(&aig->inputs)) {
+
+      // if we have no input data, every input before this one had an inferable
+      // index, so we need to construct all this data now
+      if (bb_is_empty(&aig->inputs)) {
+        for (uint64_t j = 0; j < i; j++) {
+          uint64_t input = get_inferred_input(aig, j);
+          if ((rc = bb_append(&aig->inputs, input, bb_limit(aig))))
+            return rc;
+        }
+      }
+
+      // store this input
+      if ((rc = bb_append(&aig->inputs, n, bb_limit(aig))))
+        return rc;
+    }
   }
 
   return 0;

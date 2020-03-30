@@ -4,6 +4,24 @@
 #include "aig_t.h"
 #include <stdint.h>
 
+/** get the input that would be inferred from an input’s position
+ *
+ * \param aig Structure to examine
+ * \param index Index of the input
+ * \returns The inferred encoded input
+ */
+__attribute__((visibility("internal")))
+uint64_t get_inferred_input(const aig_t *aig, uint64_t index);
+
+/** get the encoded input of an already parsed input
+ *
+ * \param aig Structure to examine
+ * \param index Index of the input to lookup
+ * \returns The inferred encoded input
+ */
+__attribute__((visibility("internal")))
+uint64_t get_input(const aig_t *aig, uint64_t index);
+
 /** get the LHS that would be inferred from an AND gate
  *
  * \param aig Structure to examine
