@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#ifdef __cpluscplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -327,6 +327,6 @@ void aig_iter_free(aig_node_iter_t **it);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef __cpluscplus
+#ifdef __cplusplus
 }
 #endif
