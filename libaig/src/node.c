@@ -1,5 +1,6 @@
 #include <aig/aig.h>
 #include "aig_t.h"
+#include <assert.h>
 #include "bitbuffer.h"
 #include <errno.h>
 #include "infer.h"
@@ -237,26 +238,68 @@ int aig_get_node(aig_t *aig, uint64_t variable_index, struct aig_node *result) {
   if (result == NULL)
     return EINVAL;
 
-  uint64_t i = variable_index;
-
   // index 0 is the constant FALSE
-  if (i == 0) {
+  if (variable_index == 0) {
     memset(result, 0, sizeof(*result));
     result->type = AIG_CONSTANT;
     return 0;
   }
-  i--;
 
-  if (i < aig->input_count)
-    return aig_get_input(aig, i, result);
-  i -= aig->input_count;
+  if (aig->binary) {
+    // indices are guaranteed in order in the binary format, so we can infer the
+    // type of this node and how to find it
 
-  if (i < aig->latch_count)
-    return aig_get_latch(aig, i, result);
-  i -= aig->latch_count;
+    uint64_t i = variable_index - 1;
 
-  if (i < aig->and_count)
-    return aig_get_and(aig, i, result);
+    if (i < aig->input_count)
+      return aig_get_input(aig, i, result);
+    i -= aig->input_count;
 
+    if (i < aig->latch_count)
+      return aig_get_latch(aig, i, result);
+    i -= aig->latch_count;
+
+    if (i < aig->and_count)
+      return aig_get_and(aig, i, result);
+
+  } else {
+    // indices can appear out of order in the ASCII format, so we need to step
+    // through the nodes until we find it
+
+    int rc = 0;
+    struct aig_node n;
+
+    for (uint64_t i = 0; i < aig->input_count; i++) {
+      if ((rc = aig_get_input(aig, i, &n)))
+        return rc;
+      assert(n.type == AIG_INPUT);
+      if (n.input.variable_index == variable_index) {
+        *result = n;
+        return 0;
+      }
+    }
+
+    for (uint64_t i = 0; i < aig->latch_count; i++) {
+      if ((rc = aig_get_latch(aig, i, &n)))
+        return rc;
+      assert(n.type == AIG_LATCH);
+      if (n.latch.current == variable_index) {
+        *result = n;
+        return 0;
+      }
+    }
+
+    for (uint64_t i = 0; i < aig->and_count; i++) {
+      if ((rc = aig_get_and(aig, i, &n)))
+        return rc;
+      assert(n.type == AIG_AND_GATE);
+      if (n.and_gate.lhs == variable_index) {
+        *result = n;
+        return 0;
+      }
+    }
+  }
+
+  // if we reached here, the caller gave us an invalid variable index
   return ERANGE;
 }
