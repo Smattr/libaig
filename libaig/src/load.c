@@ -84,8 +84,11 @@ done:
   if (rc == 0) {
     *aig = a;
   } else {
-    free(a);
-    a = NULL;
+    // if we got as far as adding the file handle the data structure, remove it
+    // so it is not closed by aig_free()
+    if (a != NULL && a->source != NULL)
+      a->source = NULL;
+    aig_free(&a);
   }
 
   return rc;
