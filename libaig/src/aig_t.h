@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-struct __attribute__((visibility("internal"))) aig {
+struct aig {
 
   /// maximum variable index
   uint64_t max_index;

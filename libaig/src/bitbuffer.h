@@ -13,7 +13,7 @@
 
 /// Dynamic buffer. A zeroed out structure is considered initialised, so if the
 /// buffer or handle members are 0, the buffer is considered empty.
-typedef struct __attribute__((visibility("internal"))) {
+typedef struct {
 
   /// Main contents of the buffer. Only coherent after fflushing handle.
   char *buffer;
