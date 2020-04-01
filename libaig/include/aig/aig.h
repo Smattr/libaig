@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -324,6 +325,17 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item);
  * \param it The iterator to deallocate
  */
 void aig_iter_free(aig_node_iter_t **it);
+
+/** get the level (maximum distance to an input) of a node within an AIG
+ *
+ * This function assumes the containing AIG is valid and contains no cycles.
+ *
+ * \param aig The containing AIG
+ * \param node The node to examine
+ * \param level [out] The level of this node on success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level);
 
 ////////////////////////////////////////////////////////////////////////////////
 

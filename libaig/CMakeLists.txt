@@ -3,6 +3,7 @@ add_library(libaig
   src/free.c
   src/getters.c
   src/infer.c
+  src/level.c
   src/load.c
   src/lookup.c
   src/new.c
