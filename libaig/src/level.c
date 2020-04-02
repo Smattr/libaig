@@ -30,6 +30,10 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
 
     case AIG_LATCH: {
 
+      // does this latch have an invalid index (inconsistent AIG)?
+      if (node->latch.current > aig->max_index)
+        return ERANGE;
+
       // find the node for its next state
       struct aig_node n;
       int rc = aig_get_node(aig, node->latch.next, &n);
@@ -48,6 +52,10 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
 
     case AIG_OUTPUT: {
 
+      // does this output have an invalid index?
+      if (node->output.variable_index > aig->max_index)
+        return ERANGE;
+
       // if the user gave us an output, look up the input, latch, or AND gate it
       // is actually wired up to
       struct aig_node n;
@@ -60,6 +68,10 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
     }
 
     case AIG_AND_GATE: {
+
+      // does this AND gate have an invalid index?
+      if (node->and_gate.lhs > aig->max_index)
+        return ERANGE;
 
       // find the node for its first RHS term
       struct aig_node rhs0;
