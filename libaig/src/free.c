@@ -31,6 +31,9 @@ void aig_free(aig_t **aig) {
   free(a->symtab);
   a->symtab = NULL;
 
+  free(a->levels);
+  a->levels = NULL;
+
   if (a->source != NULL)
     (void)fclose(a->source);
   a->source = NULL;

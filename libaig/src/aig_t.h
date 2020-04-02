@@ -3,6 +3,7 @@
 #include <aig/aig.h>
 #include <assert.h>
 #include "bitbuffer.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -46,6 +47,9 @@ struct aig {
 
   /// optional symbol table
   char **symtab;
+
+  /// cache of node level information
+  size_t *levels;
 
   /// internal parsing state
   struct {
