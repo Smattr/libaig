@@ -1,12 +1,29 @@
 #include <aig/aig.h>
 #include "aig_t.h"
+#include <assert.h>
 #include <errno.h>
-#include <stddef.h>
+#include <stdlib.h>
 
 static size_t max(size_t a, size_t b) {
   if (a > b)
     return a;
   return b;
+}
+
+static int cache_level(aig_t *aig, size_t index, size_t level) {
+  assert(aig != NULL);
+  assert(index <= aig->max_index);
+
+  // do we need to create the cache first?
+  if (aig->levels == NULL) {
+    aig->levels = calloc(aig->max_index, sizeof(aig->levels[0]));
+    if (aig->levels == NULL)
+      return ENOMEM;
+  }
+
+  aig->levels[index] = level;
+
+  return 0;
 }
 
 int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
@@ -53,6 +70,10 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
 
       // then we are one deeper
       *level = l + 1;
+
+      // cache this for future calls; ignore failure as it is tolerable
+      (void)cache_level(aig, node->latch.current, *level);
+
       return 0;
     }
 
@@ -113,6 +134,10 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
 
       // our level is one more than the greatest of these
       *level = max(l_rhs0, l_rhs1) + 1;
+
+      // cache this for future calls; ignore failure as it is tolerable
+      (void)cache_level(aig, node->and_gate.lhs, *level);
+
       return 0;
     }
   }
