@@ -141,4 +141,8 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level) {
       return 0;
     }
   }
+
+  // all cases are handled above
+  assert(!"unreachable");
+  return ENOTRECOVERABLE;
 }
