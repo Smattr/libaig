@@ -16,7 +16,7 @@ static int cache_level(aig_t *aig, size_t index, size_t level) {
 
   // do we need to create the cache first?
   if (aig->levels == NULL) {
-    aig->levels = calloc(aig->max_index, sizeof(aig->levels[0]));
+    aig->levels = calloc(aig->max_index + 1, sizeof(aig->levels[0]));
     if (aig->levels == NULL)
       return ENOMEM;
   }
