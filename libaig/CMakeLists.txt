@@ -1,5 +1,6 @@
 add_library(libaig
   src/bitbuffer.c
+  src/fanout.c
   src/free.c
   src/getters.c
   src/infer.c

@@ -326,6 +326,16 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item);
  */
 void aig_iter_free(aig_node_iter_t **it);
 
+/** create an iterator over fanout nodes from a given node
+ *
+ * \param aig AIG to iterate over
+ * \param node Node from which to find fanouts
+ * \param it [out] A created iterator on success
+ * \returns 0 on success or an errno on failure
+ */
+int ait_iter_fanout(aig_t *aig, const struct aig_node *node,
+  aig_node_iter_t **it);
+
 /** get the level (maximum distance to an input) of a node within an AIG
  *
  * This function assumes the containing AIG is valid and contains no cycles.
