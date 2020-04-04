@@ -336,6 +336,15 @@ void aig_iter_free(aig_node_iter_t **it);
 int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   aig_node_iter_t **it);
 
+/** get the number of nodes taking the given node as an input in this AIG
+ *
+ * \param aig The containing AIG
+ * \param node The node to consider
+ * \param count [out] The fanout count of this node on success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_fanout_count(aig_t *aig, const struct aig_node *node, size_t *count);
+
 /** get the level (maximum distance to an input) of a node within an AIG
  *
  * This function assumes the containing AIG is valid and contains no cycles.
