@@ -14,6 +14,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
 endif()
 
+add_subdirectory(aig2sat)
 add_subdirectory(aig-cat)
 add_subdirectory(aig-ls)
 add_subdirectory(libaig)
