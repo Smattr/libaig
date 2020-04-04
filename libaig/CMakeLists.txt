@@ -9,7 +9,8 @@ add_library(libaig
   src/new.c
   src/node.c
   src/node_iter.c
-  src/parse.c)
+  src/parse.c
+  src/sat.c)
 
 target_include_directories(libaig
   PUBLIC

@@ -339,6 +339,52 @@ int aig_node_level(aig_t *aig, const struct aig_node *node, size_t *level);
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// SAT generation //////////////////////////////////////////////////////////////
+
+/** generate a SAT representation of an AIG
+ *
+ * \param aig AIG to translate
+ * \param sat [out] SAT problem corresponding to the AIG on success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_to_sat_string(aig_t *aig, char **sat);
+
+/** write a SAT representation of an AIG to a file
+ *
+ * \param aig AIG to translate
+ * \param f Output file to write to
+ * \returns 0 on success or an errno on failure
+ */
+int aig_to_sat_file(aig_t *aig, FILE *f);
+
+/** generate a SAT representation of an AIG term
+ *
+ * \param node Node to translate
+ * \param term [out] SAT representation of the corresponding term on success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_node_to_sat_term(const struct aig_node *node, char **term);
+
+/** generate a SAT representation of an AIG
+ *
+ * \param node Node to translate
+ * \param define [out] SAT representation of the corresponding definition on
+ *   success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_node_to_sat_define(const struct aig_node *node, char **define);
+
+/** generate a SAT representation of an AIG
+ *
+ * \param node Node to translate
+ * \param constraint [out] SAT representation of the corresponding constraint on
+ *   success
+ * \returns 0 on success or an errno on failure
+ */
+int aig_node_to_sat_constraint(const struct aig_node *node, char **constraint);
+
+////////////////////////////////////////////////////////////////////////////////
+
 #ifdef __cplusplus
 }
 #endif
