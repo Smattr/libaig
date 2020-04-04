@@ -56,7 +56,7 @@ static uint64_t index(const struct aig_node *node) {
   __builtin_unreachable();
 }
 
-int ait_iter_fanout(aig_t *aig, const struct aig_node *node,
+int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   aig_node_iter_t **it) {
 
   if (aig == NULL)

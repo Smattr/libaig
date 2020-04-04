@@ -333,7 +333,7 @@ void aig_iter_free(aig_node_iter_t **it);
  * \param it [out] A created iterator on success
  * \returns 0 on success or an errno on failure
  */
-int ait_iter_fanout(aig_t *aig, const struct aig_node *node,
+int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   aig_node_iter_t **it);
 
 /** get the level (maximum distance to an input) of a node within an AIG
