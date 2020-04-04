@@ -46,6 +46,22 @@ bool aig_iter_has_next(const aig_node_iter_t *it) {
   return true;
 }
 
+static void move_next(aig_node_iter_t *it) {
+
+  assert(it != NULL);
+
+  do {
+
+    // move to the next index
+    ++it->index;
+
+    // loop while we have not exhausted the iterator and have not satisfied the
+    // predicate
+  } while (aig_iter_has_next(it) &&
+    it->predicate != NULL &&
+    !it->predicate(it->aig, it->index, it->predicate_state));
+}
+
 int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
 
   if (it == NULL)
@@ -64,7 +80,7 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
   // are we currently pointing at an input?
   if (index < it->aig->input_count) {
     int rc = aig_get_input(it->aig, index, item);
-    it->index++;
+    move_next(it);
     return rc;
   }
   index -= it->aig->input_count;
@@ -72,7 +88,7 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
   // are we currently pointing at a latch?
   if (index < it->aig->latch_count) {
     int rc = aig_get_latch(it->aig, index, item);
-    it->index++;
+    move_next(it);
     return rc;
   }
   index -= it->aig->latch_count;
@@ -80,7 +96,7 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
   // are we currently pointing at an output?
   if (index < it->aig->output_count) {
     int rc = aig_get_output(it->aig, index, item);
-    it->index++;
+    move_next(it);
     return rc;
   }
   index -= it->aig->output_count;
@@ -89,7 +105,7 @@ int aig_iter_next(aig_node_iter_t *it, struct aig_node *item) {
   assert(index < it->aig->and_count && "incorrect aig_iter_next() logic");
 
   int rc = aig_get_and(it->aig, index, item);
-  it->index++;
+  move_next(it);
   return rc;
 }
 

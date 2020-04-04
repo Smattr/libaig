@@ -11,4 +11,10 @@ struct aig_node_iter {
 
   /// index we are currently at
   uint64_t index;
+
+  /// optional filter to apply during iteration
+  bool (*predicate)(aig_t *aig, uint64_t index, void *state);
+
+  /// optional state for the filter
+  void *predicate_state;
 };
