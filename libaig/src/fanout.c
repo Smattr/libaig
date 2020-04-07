@@ -44,7 +44,7 @@ static bool is_fanout(aig_t *aig, uint64_t index, void *state) {
   return false;
 }
 
-static uint64_t index(const struct aig_node *node) {
+static uint64_t variable_index(const struct aig_node *node) {
   assert(node != NULL);
   switch (node->type) {
     case AIG_CONSTANT: return 0;
@@ -71,7 +71,7 @@ int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   // if we are on a 32-bit platform, it is possible the node’s variable index
   // will not fit in the predicate state member
   if (sizeof(uint64_t) > sizeof((*it)->predicate_state) &&
-      index(node) > (uint64_t)UINTPTR_MAX)
+      variable_index(node) > (uint64_t)UINTPTR_MAX)
     return ERANGE;
 
   // create a new iterator;
@@ -80,7 +80,7 @@ int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   if (rc)
     return rc;
 
-  void *predecessor = (void*)(uintptr_t)index(node);
+  void *predecessor = (void*)(uintptr_t)variable_index(node);
 
   // advance the iterator until it is exhausted or we hit a valid node
   while (i->index < aig->input_count + aig->latch_count + aig->and_count
