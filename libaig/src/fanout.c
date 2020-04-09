@@ -5,33 +5,24 @@
 #include <limits.h>
 #include "node_iter.h"
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
-static bool is_fanout(aig_t *aig, uint64_t index, void *state) {
+static bool is_fanout(const struct aig_node *n, uint64_t predecessor) {
 
-  assert(aig != NULL);
-  assert(state != NULL);
+  assert(n != NULL);
 
-  uint64_t predecessor = (uint64_t)(uintptr_t)state;
-
-  struct aig_node n;
-  if (aig_get_node(aig, index, &n)) {
-    // if we failed to retrieve this node, not much we can do
-    return false;
-  }
-
-  switch (n.type) {
+  switch (n->type) {
 
     case AIG_LATCH:
-      if (n.latch.next == predecessor)
+      if (n->latch.next == predecessor)
         return true;
       break;
 
     case AIG_AND_GATE:
-      if (n.and_gate.rhs[0] == predecessor)
+      if (n->and_gate.rhs[0] == predecessor)
         return true;
-      if (n.and_gate.rhs[1] == predecessor)
+      if (n->and_gate.rhs[1] == predecessor)
         return true;
       break;
 
@@ -56,6 +47,94 @@ static uint64_t variable_index(const struct aig_node *node) {
   __builtin_unreachable();
 }
 
+static int advance_to_next(aig_node_iter_t *it) {
+
+  assert(it != NULL);
+  assert(it->state != NULL);
+
+  aig_t *aig = it->aig;
+  int rc = 0;
+  uint64_t predecessor = *(uint64_t*)it->state;
+
+  while (it->index < aig->latch_count + aig->and_count) {
+
+    // extract the current node
+    struct aig_node n;
+    if (it->index < aig->latch_count) {
+      rc = aig_get_latch(aig, it->index, &n);
+    } else {
+      uint64_t index = it->index - aig->latch_count;
+      rc = aig_get_and(aig, index, &n);
+    }
+
+    if (rc)
+      return rc;
+
+    if (is_fanout(&n, predecessor))
+      break;
+
+    ++it->index;
+  }
+
+  return 0;
+}
+
+static int next(aig_node_iter_t *it, struct aig_node *item) {
+
+  assert(it != NULL);
+  assert(item != NULL);
+  assert(aig_iter_has_next(it));
+
+  if (it->aig == NULL)
+    return EINVAL;
+
+  aig_t *aig = it->aig;
+  int rc = 0;
+
+  // extract the current node
+  struct aig_node n;
+  if (it->index < aig->latch_count) {
+    rc = aig_get_latch(aig, it->index, &n);
+  } else {
+    uint64_t index = it->index - aig->latch_count;
+    rc = aig_get_and(aig, index, &n);
+  }
+
+  if (rc)
+    return rc;
+
+  // move to the next valid node
+  ++it->index;
+  if ((rc = advance_to_next(it)))
+    return rc;
+
+  *item = n;
+  return rc;
+}
+
+static bool has_next(const aig_node_iter_t *it) {
+
+  assert(it != NULL);
+
+  if (it->aig == NULL)
+    return false;
+
+  const aig_t *aig = it->aig;
+
+  // if the current index is out of range, we are exhausted
+  if (it->index >= aig->latch_count + aig->and_count)
+    return false;
+
+  // otherwise, there is more to consume
+  return true;
+}
+
+static void fanout_free(aig_node_iter_t *it) {
+  // clean up the predecessor index we saved
+  free(it->state);
+  it->state = NULL;
+}
+
 int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   aig_node_iter_t **it) {
 
@@ -68,32 +147,32 @@ int aig_iter_fanout(aig_t *aig, const struct aig_node *node,
   if (it == NULL)
     return EINVAL;
 
-  // if we are on a 32-bit platform, it is possible the node’s variable index
-  // will not fit in the predicate state member
-  if (sizeof(uint64_t) > sizeof((*it)->predicate_state) &&
-      variable_index(node) > (uint64_t)UINTPTR_MAX)
-    return ERANGE;
-
   // create a new iterator;
   aig_node_iter_t *i = NULL;
   int rc = aig_iter(aig, &i);
   if (rc)
     return rc;
 
-  void *predecessor = (void*)(uintptr_t)variable_index(node);
+  // override the next-finding mechanism with our own
+  i->has_next = has_next;
+  i->next = next;
+  i->free = fanout_free;
 
-  // advance the iterator until it is exhausted or we hit a valid node
-  while (i->index < aig->input_count + aig->latch_count + aig->and_count
-      + aig->output_count) {
+  // save the predecessor index within the iterator
+  uint64_t index = variable_index(node);
+  i->state = calloc(1, sizeof(uint64_t));
+  if (i->state == NULL) {
+    aig_iter_free(&i);
+    return ENOMEM;
+  }
+  *(uint64_t*)i->state = index;
 
-    if (is_fanout(aig, i->index, predecessor))
-      break;
-
-    ++i->index;
+  // advance until we hit a valid fanout or exhaust the nodes
+  if ((rc = advance_to_next(i))) {
+    aig_iter_free(&i);
+    return rc;
   }
 
-  i->predicate = is_fanout;
-  i->predicate_state = predecessor;
   *it = i;
 
   return 0;

@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
+#include "node_iter.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -224,6 +226,78 @@ static int node_to_sat_constraint(const struct aig_node *node, FILE *f) {
   return 0;
 }
 
+// has_next() behaviour for an iterator over nodes for SAT production
+static bool has_next(const aig_node_iter_t *it) {
+
+  assert(it != NULL);
+
+  if (it->aig == NULL)
+    return false;
+
+  const aig_t *aig = it->aig;
+
+  // if the current index is out of range, we are exhausted
+  if (it->index >= aig->input_count + aig->latch_count + aig->and_count)
+    return false;
+
+  // otherwise, there is more to consume
+  return true;
+}
+
+// next() behaviour for an iterator over nodes for SAT production
+static int next(aig_node_iter_t *it, struct aig_node *item) {
+
+  assert(it != NULL);
+  assert(item != NULL);
+  assert(aig_iter_has_next(it));
+
+  if (it->aig == NULL)
+    return EINVAL;
+
+  uint64_t index = it->index;
+
+  // are we currently pointing at an input?
+  if (index < it->aig->input_count) {
+    int rc = aig_get_input(it->aig, index, item);
+    ++it->index;
+    return rc;
+  }
+  index -= it->aig->input_count;
+
+  // are we currently pointing at a latch?
+  if (index < it->aig->latch_count) {
+    int rc = aig_get_latch(it->aig, index, item);
+    ++it->index;
+    return rc;
+  }
+  index -= it->aig->latch_count;
+
+  // if we have reached here, we must be up to an AND gate
+  assert(index < it->aig->and_count && "incorrect sat::next() logic");
+
+  int rc = aig_get_and(it->aig, index, item);
+  ++it->index;
+  return rc;
+}
+
+
+// create an iterator for the nodes we need for SAT construction
+static int sat_iter(aig_t *aig, aig_node_iter_t **it) {
+
+  assert(aig != NULL);
+  assert(it != NULL);
+
+  int rc = aig_iter(aig, it);
+  if (rc)
+    return rc;
+
+  // override the next determination to prevent iterating over outputs
+  (*it)->has_next = has_next;
+  (*it)->next = next;
+
+  return 0;
+}
+
 int aig_to_sat_file(aig_t *aig, FILE *f) {
 
   if (aig == NULL)
@@ -237,7 +311,7 @@ int aig_to_sat_file(aig_t *aig, FILE *f) {
   // define each node
   {
     aig_node_iter_t *it = NULL;
-    if ((rc = aig_iter(aig, &it)))
+    if ((rc = sat_iter(aig, &it)))
       return rc;
 
     while (aig_iter_has_next(it)) {
@@ -260,7 +334,7 @@ int aig_to_sat_file(aig_t *aig, FILE *f) {
   // emit constraints for each node
   {
     aig_node_iter_t *it = NULL;
-    if ((rc = aig_iter(aig, &it)))
+    if ((rc = sat_iter(aig, &it)))
       return rc;
 
     while (aig_iter_has_next(it)) {
